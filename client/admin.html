@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/style.css">
+  <title>Lending dApp Admin</title>
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <script type="module" src="js/admin.js"></script>
+
+  <div class="maincontainer">
+    <div class="logo">
+      <img src="images/logo3b.jpg" width="400" />
+    </div>
+    <div class="connectBtn">
+      <radix-connect-button />
+    </div>
+  </div>
+
+  <div class="big-container">
+    <div class="left-container">    
+      <h1>DApp Tuning</h1>
+      Set the reward level for account providing liquidity (Admin or Owner badge needed)
+      <p><button id="setReward">Set reward level</button></p>
+      <div class="number">
+        <input type="text" placeholder="Reward" id="reward">
+      </div>
+
+
+      <br>
+      Set the interest level for account borrowing liquidity (Admin or Owner badge needed)
+      <p><button id="setInterest">Set interest level</button></p>
+      <div class="number">
+        <input type="text" placeholder="Interest" id="interest">
+      </div>
+
+      <br>
+      Sets the length of the period beyond which liquidity can be provided again (Admin or Owner badge needed)
+      <p><button id="setPeriodLength">Sets the length of the period</button></p>
+      <div class="number">
+       <input type="text" placeholder="Sets Period Length" id="periodLength">
+      </div>
+
+      <br>
+      Extend the Lending Pool size by the specified number of token (Admin or Owner or Staff badge needed)
+      <p><button id="extendLendingPool">Extend the Lending Pool size</button></p>
+      <div class="number">
+        <input type="text" placeholder="Extend the Lending Pool size" id="extendLendingPoolAmount">
+      </div>
+
+      <br>
+      <h1>Administrative Function</h1>
+      Withdraw Fund for the development of the project (Owner badge needed)
+      <p><button id="WithdrawEarnings">Withdraw Fund</button></p>
+      <div class="number">
+        <input type="text" placeholder="Number of Token" id="numberOfEarnedToken">
+      </div>
+
+      <br>
+      Fund the main pool (Admin or Owner badge needed)
+      <p><button id="fundMainPool">Fund</button></p> 
+      <div class="number">
+        <input type="text" placeholder="Number of Token" id="numberOfFundedTokens">
+      </div>
+
+      <br>
+      <h1>Staff Badges</h1>
+      Mint a Staff Badge (Admin or Owner badge needed)
+      <p><button id="mintStaffBadge">Mint Staff Badge</button></p>
+      <div class="number">
+        <input type="text" placeholder="staffUsername" id="staffUsername">
+      </div>
+    </div>
+
+    <div class="right-container">
+      <h1>Smart Contract Documentation</h1>
+      <a href="https://docs-lending.stakingcoins.eu/">Docs</a>
+    </div>
+  </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+</body>
+
+</html>
