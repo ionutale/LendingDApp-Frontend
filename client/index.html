@@ -104,8 +104,14 @@
       <p><button id="borrow">Borrow</button></p>
       <div class="number">
           <input type="text" placeholder="Number of Token" id="numberOfRequestedXrdTokens">
+          <input type="text" placeholder="Epoch length of the borrow" id="expectedBorrowLength">
+          <input type="hidden" placeholder="Account address" id="accountAddress">
       </div>
       <div class="number" id="borrowTxResult"></div>
+      <h2>Current Borrowers</h2>
+      <a id="borrowers-link" href="https://stokenet-dashboard.radixdlt.com/account/borrowers/nfts">
+        <div class="number" id="borrowers"></div></a>
+
 
       <br>  <br>
       Repay borrowings (fees and interest will be calculated over the time the borrow has been opened) !

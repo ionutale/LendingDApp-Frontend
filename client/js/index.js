@@ -48,16 +48,21 @@ rdt.walletApi.walletData$.subscribe((walletData) => {
   console.log("subscription wallet data: ", walletData)
   accountName = walletData.accounts[0].label
   accountAddress = walletData.accounts[0].address
+  console.log("accountAddress: ", accountAddress)
+  document.getElementById('accountAddress').value = accountAddress
 })
 
 
+
 // ***** Main function *****
-function createTransactionOnClick(elementId, inputTextId, method, errorField) {
+function createTransactionOnClick(elementId, inputTextId, inputTextId2, method, errorField) {
   document.getElementById(elementId).onclick = async function () {
     let inputValue = document.getElementById(inputTextId).value;
+    let inputValue2 = document.getElementById(inputTextId2).value;
     console.log(`got inputValue = `, inputValue);
+    console.log(`got inputValue2 = `, inputValue2);
 
-    const manifest = generateManifest(method, inputValue);
+    const manifest = generateManifest(method, inputValue, inputValue2);
     console.log(`${method} manifest`, manifest);
 
     const result = await rdt.walletApi.sendTransaction({
@@ -96,7 +101,7 @@ function createTransactionOnButtonClick(elementId, method, errorField) {
 }
 
 // ***** Utility function *****
-function generateManifest(method, inputValue) {
+function generateManifest(method, inputValue, inputValue2) {
   let code;
   switch (method) {
     case 'lend_tokens':
@@ -261,7 +266,9 @@ function generateManifest(method, inputValue) {
             Address("${componentAddress}")
             "borrow"
             Decimal("${inputValue}")
-            Bucket("nft");
+            Bucket("nft")
+            "${accountAddress}"
+            Decimal("${inputValue2}");
           CALL_METHOD
             Address("${accountAddress}")
             "deposit_batch"
@@ -331,13 +338,14 @@ function generateManifest(method, inputValue) {
 // Usage
 // createTransactionOnClick (elementId = divId del button, inputTextId = divId del field di inserimento, method = scrypto method)
 createTransactionOnButtonClick('register', 'register', 'registerTxResult');
-createTransactionOnClick('lendTokens', 'numberOfTokens', 'lend_tokens', 'lendTxResult');
-createTransactionOnClick('takes_back', 'numberOfLndTokens', 'takes_back', 'takeBackTxResult');
+createTransactionOnClick('lendTokens', 'numberOfTokens', 'accountAddress', 'lend_tokens', 'lendTxResult');
+createTransactionOnClick('takes_back', 'numberOfLndTokens', 'accountAddress', 'takes_back', 'takeBackTxResult');
 
-createTransactionOnClick('borrow', 'numberOfRequestedXrdTokens', 'borrow', 'borrowTxResult');
-createTransactionOnClick('repay', 'numberOfRepaiedXrdTokens', 'repay', 'repayTxResult');
+createTransactionOnClick('borrow', 'numberOfRequestedXrdTokens', 'expectedBorrowLength','borrow', 'borrowTxResult');
+createTransactionOnClick('repay', 'numberOfRepaiedXrdTokens', 'accountAddress', 'repay', 'repayTxResult');
 
-createTransactionOnClick('fundDevelopment', 'numberOfFundedTokens', 'fund', 'fundTxResult');
+createTransactionOnClick('fundDevelopment', 'numberOfFundedTokens', 'accountAddress', 'fund', 'fundTxResult');
+
 
 
 function extractErrorMessage(inputString) {

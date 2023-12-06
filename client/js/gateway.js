@@ -79,6 +79,9 @@ async function fetchComponentConfig(componentAddress) {
     const rewardTypeValue = getRewardType(json);
     const periodLengthValue = getPeriodLength(json);
     const maxBorrowValue = getBorrowMaxLimit(json);
+    //get open borrowing
+    const open = getOpenBorrowing(json);
+    console.log("open:", open);
 
     // console.log("Reward:", rewardValue);
     // console.log("Period Length:", periodLengthValue);
@@ -87,11 +90,15 @@ async function fetchComponentConfig(componentAddress) {
     const rewardTypeConfig = document.getElementById("rewardType");
     const periodLengthConfig = document.getElementById("periodLengthConfig");
     const borrowingsPoolConfig = document.getElementById("borrowingsPool");
+    const borrowersConfig = document.getElementById("borrowers");
+    const borrowersLink = document.getElementById('borrowers-link');
     rewardForYouConfig.textContent = rewardValue + '%';
     periodLengthConfig.textContent = periodLengthValue;
     interestForYouConfig.textContent = interestValue + '%';
     rewardTypeConfig.textContent = rewardTypeValue;
     borrowingsPoolConfig.textContent = maxBorrowValue;
+    borrowersConfig.textContent = open;
+    borrowersLink.href = 'https://stokenet-dashboard.radixdlt.com/account/'+open+'/nfts';
     document.getElementById("currentEpoch").textContent = currentEpoch;
   })
   .catch(error => {
@@ -128,6 +135,37 @@ function getBorrowMaxLimit(data) {
   const rewardField = data.details.state.fields.find(field => field.field_name === "max_borrowing_limit");
   return rewardField ? rewardField.value : null;
 }
+
+function getOpenBorrowing(data) {
+  // Find the first item in the "items" array
+  // const firstItem = data.items[0];
+
+  // // Check if the "details" property exists in the first item
+  // if (firstItem && firstItem.details) {
+    // Find the "credit_scores" field in the "fields" array
+    const creditScoresField = data.details.state.fields.find(field => field.field_name === "credit_scores");
+    console.log("creditScoresField:", creditScoresField);
+    // Check if the "credit_scores" field exists
+    if (creditScoresField) {
+      // Find the "root" field in the "fields" array under "credit_scores"
+      const rootField = creditScoresField.fields.find(field => field.field_name === "root");
+
+      // Check if the "root" field exists
+      if (rootField) {
+        // Assuming "fields" is an array within the "root" field
+        const rootFieldsArray = rootField.fields;
+
+        // Extracting the "value" from the first item in the array
+        const rootValue = rootFieldsArray.length > 0 ? rootFieldsArray[0].value : null;
+
+        return rootValue;
+      }
+    }
+  // }
+  // // Return null if the structure is not as expected
+  // return null;
+}
+
 
 // ************ Utility Function (Gateway) *****************
 function generatePayload(method, address, type) {
