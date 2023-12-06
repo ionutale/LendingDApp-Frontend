@@ -50,6 +50,7 @@ rdt.walletApi.walletData$.subscribe((walletData) => {
   accountAddress = walletData.accounts[0].address
   console.log("accountAddress: ", accountAddress)
   document.getElementById('accountAddress').value = accountAddress
+  document.getElementById('accountAddressForRepay').value = accountAddress
 })
 
 
@@ -299,7 +300,8 @@ function generateManifest(method, inputValue, inputValue2) {
             Address("${componentAddress}")
             "repay"
             Bucket("repay")
-            Bucket("nft");
+            Bucket("nft")
+            "${accountAddress}";
           CALL_METHOD
             Address("${accountAddress}")
             "deposit_batch"

@@ -80,8 +80,8 @@ async function fetchComponentConfig(componentAddress) {
     const periodLengthValue = getPeriodLength(json);
     const maxBorrowValue = getBorrowMaxLimit(json);
     //get open borrowing
-    const open = getOpenBorrowing(json);
-    console.log("open:", open);
+    const openBorrowing = getOpenBorrowing(json);
+    console.log("openBorrowing:", openBorrowing);
 
     // console.log("Reward:", rewardValue);
     // console.log("Period Length:", periodLengthValue);
@@ -97,14 +97,64 @@ async function fetchComponentConfig(componentAddress) {
     interestForYouConfig.textContent = interestValue + '%';
     rewardTypeConfig.textContent = rewardTypeValue;
     borrowingsPoolConfig.textContent = maxBorrowValue;
-    borrowersConfig.textContent = open;
-    borrowersLink.href = 'https://stokenet-dashboard.radixdlt.com/account/'+open+'/nfts';
-    document.getElementById("currentEpoch").textContent = currentEpoch;
+
+    // borrowersConfig.textContent = openBorrowing;
+    // borrowersLink.href = 'https://stokenet-dashboard.radixdlt.com/account/'+openBorrowing+'/nfts';
+    // document.getElementById("currentEpoch").textContent = currentEpoch;
+
+    //TODO array
+    // Call the function to update the links
+    updateBorrowersLinks(openBorrowing);
   })
   .catch(error => {
       console.error('Error fetching data:', error);
   });
 }
+
+//for showing current borrowings
+function updateBorrowersLinks(openBorrowingArray) {
+  const borrowersLinksContainer = document.getElementById('borrowers-links-container');
+  console.log('Container:', borrowersLinksContainer);
+
+  // Clear existing content in the container
+  borrowersLinksContainer.innerHTML = '';
+
+  // Iterate through the openBorrowingArray and create links for each borrower
+  openBorrowingArray.forEach(borrower => {
+    const link = createBorrowerLink(borrower);
+
+    // Append the link to the container
+    borrowersLinksContainer.appendChild(link);
+  });
+}
+
+//for showing current borrowings
+function createBorrowerLink(borrower) {
+  // Create a new list item for each link
+  const listItem = document.createElement('li');
+
+  // Create a new link element
+  const link = document.createElement('a');
+  
+  // Set attributes for the link
+  link.href = 'https://stokenet-dashboard.radixdlt.com/account/' + borrower + '/nfts';
+  link.target = '_new';
+  link.className = 'number'; // Apply the same styling as the original link
+
+  // Create a div for each link
+  const div = document.createElement('div');
+  div.textContent = borrower; // Set the text content to the borrower value
+
+  // Append the div to the link
+  link.appendChild(div);
+
+  // Append the link to the list item
+  listItem.appendChild(link);
+
+  return listItem;
+}
+
+
 
 function getCurrentEpoch(data) {
   const currentEpoch = data.details.state.fields.find(field => field.field_name === "reward");
@@ -155,10 +205,12 @@ function getOpenBorrowing(data) {
         // Assuming "fields" is an array within the "root" field
         const rootFieldsArray = rootField.fields;
 
-        // Extracting the "value" from the first item in the array
-        const rootValue = rootFieldsArray.length > 0 ? rootFieldsArray[0].value : null;
+        // // Extracting the "value" from the first item in the array
+        // const rootValue = rootFieldsArray.length > 0 ? rootFieldsArray[0].value : null;
+        // Extracting the "value" from each item in the array
+        const rootValues = rootFieldsArray.map(item => item.value);
 
-        return rootValue;
+        return rootValues;
       }
     }
   // }
