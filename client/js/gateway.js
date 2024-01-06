@@ -88,12 +88,12 @@ async function fetchComponentConfig(componentAddress) {
     const rewardForYouConfig = document.getElementById("rewardForYou");
     const interestForYouConfig = document.getElementById("interestForYou");
     const rewardTypeConfig = document.getElementById("rewardType");
-    const periodLengthConfig = document.getElementById("periodLengthConfig");
+    // const periodLengthConfig = document.getElementById("periodLengthConfig");
     const borrowingsPoolConfig = document.getElementById("borrowingsPool");
     const borrowersConfig = document.getElementById("borrowers");
     const borrowersLink = document.getElementById('borrowers-link');
     rewardForYouConfig.textContent = rewardValue + '%';
-    periodLengthConfig.textContent = periodLengthValue;
+    // periodLengthConfig.textContent = periodLengthValue;
     interestForYouConfig.textContent = interestValue + '%';
     rewardTypeConfig.textContent = rewardTypeValue;
     borrowingsPoolConfig.textContent = maxBorrowValue;
@@ -187,36 +187,59 @@ function getBorrowMaxLimit(data) {
 }
 
 function getOpenBorrowing(data) {
-  // Find the first item in the "items" array
-  // const firstItem = data.items[0];
+  const borrowersAccountsField = data.details.state.fields.find(field => field.field_name === "borrowers_accounts");
+  console.log("borrowers_accounts:", borrowersAccountsField);
 
-  // // Check if the "details" property exists in the first item
-  // if (firstItem && firstItem.details) {
-    // Find the "credit_scores" field in the "fields" array
-    const creditScoresField = data.details.state.fields.find(field => field.field_name === "credit_scores");
-    console.log("creditScoresField:", creditScoresField);
-    // Check if the "credit_scores" field exists
-    if (creditScoresField) {
-      // Find the "root" field in the "fields" array under "credit_scores"
-      const rootField = creditScoresField.fields.find(field => field.field_name === "root");
+  // Check if the "borrowers_accounts" field exists
+  if (borrowersAccountsField) {
+    // Assuming each element is a Tuple with "fields" property
+    const rootFields = borrowersAccountsField.elements.map(element => {
+      // Assuming each element has "fields" property
+      return element.fields;
+    });
 
-      // Check if the "root" field exists
-      if (rootField) {
-        // Assuming "fields" is an array within the "root" field
-        const rootFieldsArray = rootField.fields;
+    console.log("rootFields:", rootFields);
 
-        // // Extracting the "value" from the first item in the array
-        // const rootValue = rootFieldsArray.length > 0 ? rootFieldsArray[0].value : null;
-        // Extracting the "value" from each item in the array
-        const rootValues = rootFieldsArray.map(item => item.value);
+    // Check if the "rootFields" array is not empty
+    if (rootFields.length > 0) {
+      // Assuming each "fields" has an array of items with a "value" field
+      const elementsFieldsArray = rootFields
+        .flatMap(item => item) // Flatten the array of arrays
+        .map(innerItem => innerItem.value);
 
-        return rootValues;
-      }
+      console.log("elementsFieldsArray:", elementsFieldsArray);
+
+      // Return the extracted values
+      return elementsFieldsArray;
     }
-  // }
-  // // Return null if the structure is not as expected
-  // return null;
+  }
+
+  // Return an empty array if something went wrong or the structure is not as expected
+  return [];
 }
+
+
+// function getOpenBorrowing(data) {
+//     const borrowersAccountsField = data.details.state.fields.find(field => field.field_name === "borrowers_accounts");
+//     console.log("borrowers_accounts:", borrowersAccountsField);
+//     // Check if the "borrowers_accounts" field exists
+//     if (borrowersAccountsField) {
+//       // Find all elements with "field_name" equal to "fields"
+//       const rootFields = borrowersAccountsField.elements
+//         // .filter(element => element.field_name === "fields")
+//         .map(element => element.fields); // Extract the "elements" property
+//       console.log("rootFields:", rootFields);
+
+//       // Check if the "rootFields" array is not empty
+//       if (rootFields.length > 0) {
+//         // Assuming each "fields" has an array of items
+//         const elementsFieldsArray = rootFields.map(item => item.value ); 
+//         console.log("elementsFieldsArray:", elementsFieldsArray);
+//         // Return the extracted values
+//         return elementsFieldsArray;
+//       }
+//   }
+// }
 
 
 // ************ Utility Function (Gateway) *****************
@@ -284,7 +307,7 @@ async function fetchUserPosition(accountAddress) {
   .then(data => { 
       const resourceAddress = `${lnd_resourceAddress}`;
       const result = getVaultsByResourceAddress(data, resourceAddress);
-      //console.log(" NFT id " + JSON.stringify(result));
+      console.log(" NFT id " + JSON.stringify(result));
       const itemsArray = result[0].items
 
       // Loop through itemsArray and make GET requests for each item
@@ -379,7 +402,7 @@ async function fetchNftMetadata(resourceAddress, item) {
     const epochBorrowDiv = document.getElementById("epochBorrow");
     const epochRepayDiv = document.getElementById("epochRepay");
     //next epoch
-    const epochLiquidityNextDiv = document.getElementById("epochLiquidityNext");
+    //const epochLiquidityNextDiv = document.getElementById("epochLiquidityNext");
     // Find the input element by its ID
     const numberOfTokensInput = document.getElementById("numberOfTokens");
 
@@ -394,9 +417,9 @@ async function fetchNftMetadata(resourceAddress, item) {
     epochBorrowDiv.textContent = epochBorrowValue;
     epochRepayDiv.textContent = extractedValues.find(field => field.field_name === "end_borrow_epoch").value
     // update the sum
-    const currentValueEpochLength = parseFloat(periodLengthConfig.textContent) || 0; 
-    const sumValue = startLendingEpochValue + currentValueEpochLength;
-    epochLiquidityNextDiv.textContent = sumValue;
+    // const currentValueEpochLength = parseFloat(periodLengthConfig.textContent) || 0; 
+    // const sumValue = startLendingEpochValue + currentValueEpochLength;
+    // epochLiquidityNextDiv.textContent = sumValue;
   })
   .catch(error => {
       console.error('Error fetching data:', error);

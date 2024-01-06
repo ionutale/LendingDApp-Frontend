@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <link rel="stylesheet" href="css/style.css">
   <title>Lending dApp</title>
 </head>
@@ -14,117 +15,173 @@
   <script type="module" src="js/gateway.js"></script>
   <script type="module" src="js/index.js"></script>
 
-  <div class="maincontainer">
-    <div class="logo">
-      <img src="images/logo.jpg" width="200" />
+  <div class="big-container">
+    <div class="left-container">
+      <div class="content-wrapper">
+        <div class="row-wrapper">
+          <img src="images/logoSlim.jpg" alt="Logo" class="logo-image"  />
+          &nbsp;<h1> Uncollateralized Lending </h1>&nbsp;
+          <div class="column">
+            <radix-connect-button class="connectBtn"/>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="dapp">
-      <h1>Lending dApp</h1>
+  </div>
+
+  <div class="content-container">
+    <p>Registering here you'll be able to supply/borrow liquidity in/from the pool  </p>
+    <p>&nbsp;<button id="register">Register</button></p>
+    <div class="number" id="registerTxResult"></div>
+  </div>
+
+  <div class="big-container">
+    <div class="left-container">
+      <div class="content-wrapper">
+        <div class="row-wrapper">
+          <div class="column">
+            <h1>Supply</h1>
+            <p>Supplying liquidity you will receive the same number of LND tokens back and also an updated NFT</p>
+            <p><button id="lendTokens">Supply</button></p>
+            <div class="number">
+              <input type="text" placeholder="Number of Token" id="numberOfTokens">
+            </div>
+            <div class="number" id="lendTxResult"></div>
+          </div>
+  
+          <div class="column">
+            <h1>Withdraw</h1>
+            <p>Withdraw liquidity you'll get back your XRD amount plus a reward calculated over the time your funding has been provided!</p>
+            <p><button id="takes_back">Withdraw</button></p>
+            <div class="number">
+              <input type="text" placeholder="Number of Token" id="numberOfLndTokens">
+            </div>
+            <div class="number" id="takeBackTxResult"></div>
+          </div>
+          <br><br>
+        </div>
+      </div>
+  
     </div>
-    <div class="connectBtn">
-      <radix-connect-button />
+
+    <div class="right-container">
+      <div class="content-wrapper">
+        <div class="row-wrapper">
+          <div class="column">
+            <h1>Borrow</h1>
+            <p>Borrow liquidity (max 3% of the main pool until the max borrowing limit has not been reached) !
+            Please provide a time when the borrowing will be repaid and you'll receive a CreditScore NFT !</p>
+            <p><button id="borrow">Borrow</button></p>
+            <div class="number">
+                <input type="text" placeholder="Number of Token" id="numberOfRequestedXrdTokens"><br>
+                <input type="text" placeholder="N° of epochs within which the loan will be repaid" id="expectedBorrowLength">
+                <input type="hidden" placeholder="Account address" id="accountAddress">
+            </div>
+            <div class="number" id="borrowTxResult"></div>
+          </div>
+  
+          <div class="column">
+            <h1>Repay</h1>
+            <p>Repay borrowings (fees and interest will be calculated over the time the borrow has been opened) !</p>
+            <p><button id="repay">Repay</button></p>
+            <div class="number">
+                <input type="text" placeholder="Number of Token" id="numberOfRepaiedXrdTokens">
+                <input type="hidden" placeholder="Account address" id="accountAddressForRepay">
+            </div>
+            <div class="number" id="repayTxResult"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="big-container">
+    <div class="left-container">
+      <div class="content-wrapper">
+        <div class="row-wrapper">
+          <div class="column">
+            <h1>Your Position</h1>
+            Amount of your liquidity funded in the pool: <div class="number" id="amountLiquidityFunded"></div><br>
+            Epoch of supplying liquidity: <div class="number" id="epochLiquidityFunded"></div><br>
+            Epoch of redeeming liquidity: <div class="number" id="epochLiquidityReedemed"></div><br>
+            <br>
+            Amount of your borrowings: <div class="number" id="amountBorrowings"></div><br>
+            Epoch of borrow: <div class="number" id="epochBorrow"></div><br>
+            Epoch of repaying borrow: <div class="number" id="epochRepay"></div><br>
+            <br>
+            <!-- Next Epoch available for supplying new liquidity: <div class="number" id="epochLiquidityNext"></div> -->
+            Current Epoch: <div class="number" id="currentEpoch"></div>
+          </div>
+        </div>
+      </div>        
+    </div>
+
+    <div class="right-container">
+      <div class="content-wrapper">
+        <div class="row-wrapper">    
+          <div class="column">
+            <h1>Current Pool Configuration</h1>
+            Reward for liquidity funding: <div class="number" id="rewardForYou"></div><br>
+            <!-- Length of the period beyond which liquidity can be provided again: 
+            <div class="number" id="periodLengthConfig"></div> -->
+            Interest for borrowing liquidity: <div class="number" id="interestForYou"></div><br>
+            How interest is calculated (Fixed/TimeBased): <div class="number" id="rewardType"></div>
+      
+            <h1>Smart Contract Vaults</h1>
+            Amount of main liquidity pool:
+            <div class="number" id="mainPool"></div><br>
+      
+            Amount of loans still accepted:
+            <div class="number" id="lendinsPool"></div><br>
+      
+            Max Amount of borrowings accepted:
+            <div class="number" id="borrowingsPool"></div><br>
+      
+            Amount of donations received:
+            <div class="number" id="donationsPool"></div><br>
+      
+            Amount of fee collected:
+            <div class="number" id="feePool"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="big-container">
+    <div class="left-container">
+      <div class="content-wrapper">
+        Fund the development of the project and you will be recognized as an honorable member !!
+        <p><button id="fundDevelopment">Fund Development</button></p> 
+        <div class="number">
+          <input type="text" placeholder="Number of Token" id="numberOfFundedTokens">
+        </div>
+        <div class="number" id="fundTxResult"></div>
+      </div>
+    </div>
+    <div class="right-container">
+      <div class="content-wrapper">
+        <h2>Current Borrowers</h2>
+        <a id="borrowers-link" target="_new" href="https://stokenet-dashboard.radixdlt.com/account/borrowers/nfts">
+          <div class="number" id="borrowers"></div></a>
+        <br>
+        <ul id="borrowers-links-container"></ul>
+      </div>
     </div>
   </div>
 
 
   <div class="big-container">
     <div class="left-container">
-      <h1>Your Position</h1>
-      Amount of your liquidity funded in the pool: <div class="number" id="amountLiquidityFunded"></div>
-      Epoch of supplying liquidity: <div class="number" id="epochLiquidityFunded"></div>
-      Epoch of redeeming liquidity: <div class="number" id="epochLiquidityReedemed"></div>
-      <br>
-      Amount of your borrowings: <div class="number" id="amountBorrowings"></div>
-      Epoch of borrow: <div class="number" id="epochBorrow"></div>
-      Epoch of repaying borrow: <div class="number" id="epochRepay"></div>
-      <br>
-      Next Epoch available for supplying new liquidity: <div class="number" id="epochLiquidityNext"></div>
-      Current Epoch: <div class="number" id="currentEpoch"></div>
-
-      <h1>Lending DApp</h1>
-      Registering here you'll be able to fund/borrow liquidity in/from the pool
-      <p><button id="register">Register</button></p>
-      <div class="number" id="registerTxResult"></div>
-    
-      <br>
-      Supplying liquidity you will receive the same number of LND tokens back and also an updated NFT
-      <p><button id="lendTokens">Supply Liquidity</button></p>
-      <div class="number">
-        <input type="text" placeholder="Number of Token" id="numberOfTokens">
+      <div class="content-wrapper">
+        Copyright by Leonets
+        <p><a href="https://docs-lending.stakingcoins.eu/">Documentation</a></p>
       </div>
-      <div class="number" id="lendTxResult"></div>
-    
-    
-      <br>  <br>
-      Withdraw liquidity you'll get back your original XRD amount plus a reward calculated over the time your funding have been provided!
-      <p><button id="takes_back">Withdraw</button></p>
-      <div class="number">
-          <input type="text" placeholder="Number of Token" id="numberOfLndTokens">
-      </div>
-      <div class="number" id="takeBackTxResult"></div>
-    
-      <br>  <br>
-      Fund the development of the project and you will be recognized as an honorable member !!
-      <p><button id="fundDevelopment">Fund Development</button></p> 
-      <div class="number">
-        <input type="text" placeholder="Number of Token" id="numberOfFundedTokens">
-      </div>
-      <div class="number" id="fundTxResult"></div>
-    </div>
-
-    <div class="right-container">
-      <h1>Smart Contract Documentation</h1>
-      <a href="https://docs-lending.stakingcoins.eu/">Docs</a>
-
-      <h1>Current Pool Configuration</h1>
-      Reward for liquidity funding: <div class="number" id="rewardForYou"></div>
-      Length of the period beyond which liquidity can be provided again: <div class="number" id="periodLengthConfig"></div>
-      Interest for borrowing liquidity: <div class="number" id="interestForYou"></div>
-      How interest is calculated (Fixed/TimeBased): <div class="number" id="rewardType"></div>
-
-      <h1>Smart Contract Vaults</h1>
-      Amount of main liquidity pool
-      <div class="number" id="mainPool"></div>
-
-      Amount of loans still accepted
-      <div class="number" id="lendinsPool"></div>
-
-      Max Amount of borrowings accepted
-      <div class="number" id="borrowingsPool"></div>
-
-      Amount of donations received
-      <div class="number" id="donationsPool"></div>
-
-      Amount of fee collected
-      <div class="number" id="feePool"></div>
-
-      <h2>Current Borrowers</h2>
-      <!-- <a id="borrowers-link" target="_new" href="https://stokenet-dashboard.radixdlt.com/account/borrowers/nfts">
-        <div class="number" id="borrowers"></div></a>
-      <br> -->
-      <ul id="borrowers-links-container"></ul>
-
-      <br>  <br>
-      Borrow liquidity (max 3% of the main pool until the max borrowing limit has not been reached) !<br>
-      Please provide a time when the borrowing will be repaid and you'll receive a CreditScore NFT !
-      <p><button id="borrow">Borrow</button></p>
-      <div class="number">
-          <input type="text" placeholder="Number of Token" id="numberOfRequestedXrdTokens">
-          <input type="text" placeholder="N° of epochs within which the loan will be repaid" id="expectedBorrowLength">
-          <input type="hidden" placeholder="Account address" id="accountAddress">
-      </div>
-      <div class="number" id="borrowTxResult"></div>
-
-      <br>  <br>
-      Repay borrowings (fees and interest will be calculated over the time the borrow has been opened) !
-      <p><button id="repay">Repay</button></p>
-      <div class="number">
-          <input type="text" placeholder="Number of Token" id="numberOfRepaiedXrdTokens">
-          <input type="hidden" placeholder="Account address" id="accountAddressForRepay">
-      </div>
-      <div class="number" id="repayTxResult"></div>
     </div>
   </div>
+
+</div>
 
  
 

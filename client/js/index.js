@@ -37,6 +37,7 @@ let lnd_tokenAddress = import.meta.env.VITE_LND_TOKEN_ADDRESS // LND token resou
 
 let xrdAddress = import.meta.env.VITE_XRD //Stokenet XRD resource address
 
+console.log("componentAddress: ", componentAddress)
 
 let accountAddress
 let accountName

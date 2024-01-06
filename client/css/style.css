@@ -8,79 +8,32 @@ body {
   padding-left: 1.33rem;
   padding-right: 1.33rem;
   margin-bottom: 3.33rem;
-}
-
-.dapp {
-  padding: 1rem;
-  border-radius: 33rem;
-  align-items: left;
-  border: none;
-  font-size: x-large;
-  color: #333333;
-  min-width: 43%;
-}
-
-button {
-  padding: 1rem;
-  background-color: #A2FFAB;
-  border-radius: 33rem;
-  border: 2px solid #000000; 
-  font-size: x-large;
-  color: #333333;
-  min-width: 33%;
-}
-
-input {
-  padding: 1.33rem;
-  border-radius: .33rem;
-  width: 66%;
-  margin-bottom: 1.33rem;
-  display: block;
-  border: none;
-}
-
-.number {
-  width: 47%;
-}
-
-.number input[type="text"] {
-  border: 2px solid #000000; /* Black border with 2px width */
-  border-radius: 5px; /* Optional: Add border-radius for rounded corners */
-  padding: 0.5rem; /* Optional: Add padding for spacing inside the input */
-}
-
-.container {
-  background-color: #F4F5F9;
-  color: #414141;
-  max-width: 70%;
-  padding: 1rem;
-  overflow-x: scroll;
-  border-radius: .33rem;
+  font-size: 18px;
+  overflow-x: hidden;
 }
 
 .maincontainer {
   display: flex;
-  max-width: 75%;
-  align-items: center; /* Vertically center the content */
+  align-items: center;
   padding: 1rem;
   border-radius: .33rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center; /* Align items vertically within .logo */
+}
+
+.logo-image {
+  height: auto;
 }
 
 .connectBtn {
   background-color: white;
   padding: 1rem;
-  display: flex;
-  flex-direction: row-reverse;
-
-  flex-basis: 30%; /* Adjust as needed */
-  display: flex;
-  justify-content: flex-end;
-}
-
-.logo {
-  flex-basis: 48%;
-  flex: 1; /* Allow this div to grow and take available space */
-  margin-right: 0px; /* Optional margin between the two divs */
+  margin-right: auto; /* Push to the right side on larger screens */
+  /* Optional: Add a max-width to prevent it from taking up the full width */
+  /* max-width: 300px; Adjust as needed */
 }
 
 .docs-link {
@@ -90,11 +43,51 @@ input {
   text-align: left;
 }
 
+button {
+  padding: 1rem;
+  background-color: #c3c7c8;
+  border-radius: 23rem;
+  border: 1px solid #000000; 
+  font-size: 18px;
+  color: #333333;
+  min-width: 33%;
+}
+
+.input {
+  padding: 1.33rem;
+  border-radius: .33rem;
+  width: 66%;
+  margin-bottom: 1.33rem;
+  display: block;
+  border: none;
+}
+
+.number {
+  display: inline-block; 
+  white-space: nowrap; /* Prevent wrapping */
+}
+
+.number input[type="text"] {
+  border: 2px solid #000000; /* Black border with 2px width */
+  border-radius: 5px; /* Optional: Add border-radius for rounded corners */
+  padding: 0.5rem; /* Optional: Add padding for spacing inside the input */
+}
 
 .header-container {
   display: flex;
-  justify-content: space-between;
-  padding: 10px; /* Add padding for spacing if needed */
+  align-items: center;
+  justify-content: center; /* Center horizontally */
+  padding: 1rem;
+  font-size: 32px;
+  border-radius: .33rem;
+}
+
+
+.content-container {
+  display: flex;
+  align-items: center; /* Vertically center the content */
+  padding: 1rem;
+  border-radius: .33rem;
 }
 
 .big-container {
@@ -107,9 +100,38 @@ input {
   flex-basis: 48%;
 }
 
+.left-container .content-wrapper,
+.right-container .content-wrapper  {
+  border: 1px solid #000; /* Add a border to the content wrapper */
+  padding: 10px; /* Add some padding for better visual separation */
+  margin-bottom: 10px; /* Add some margin between content wrappers */
+}
+
+.left-container .row-wrapper,
+.right-container .row-wrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.left-container .column,
+.right-container .column {
+  flex-basis: auto;
+}
+
 .left-container h1,
 .right-container h1 {
   text-align: left;
+}
+
+@media only screen and (max-width: 768px) {
+  .big-container {
+    flex-direction: column; /* Stack containers vertically on small screens */
+  }
+
+  .left-container,
+  .right-container {
+    flex-basis: 100%; /* Take full width on small screens */
+  }
 }
 
 
