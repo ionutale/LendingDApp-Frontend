@@ -1,12 +1,10 @@
 body {
-  background-image: url("../images/BackgroundGradient.png");
+  /* background-image: url("../images/BackgroundGradient.png"); */
   color: #333333;
   margin: 0;
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-color: #FFFFFF;
-  padding-left: 1.33rem;
-  padding-right: 1.33rem;
   margin-bottom: 3.33rem;
   font-size: 18px;
   overflow-x: hidden;
@@ -25,7 +23,7 @@ body {
 }
 
 .logo-image {
-  height: auto;
+  max-width: 200px;
 }
 
 .connectBtn {
@@ -46,7 +44,7 @@ body {
 button {
   padding: 1rem;
   background-color: #c3c7c8;
-  border-radius: 23rem;
+  border-radius: 10px;
   border: 1px solid #000000; 
   font-size: 18px;
   color: #333333;
@@ -71,6 +69,7 @@ button {
   border: 2px solid #000000; /* Black border with 2px width */
   border-radius: 5px; /* Optional: Add border-radius for rounded corners */
   padding: 0.5rem; /* Optional: Add padding for spacing inside the input */
+  margin-top: 0.25rem;
 }
 
 .header-container {
@@ -93,6 +92,14 @@ button {
 .big-container {
   display: flex;
   justify-content: space-between;
+  padding-left: 1.33rem;
+  padding-right: 1.33rem;
+}
+
+.header {  
+  position: sticky;
+  background-color: white;
+  top: 0;
 }
 
 .left-container,
@@ -100,27 +107,40 @@ button {
   flex-basis: 48%;
 }
 
-.left-container .content-wrapper,
-.right-container .content-wrapper  {
-  border: 1px solid #000; /* Add a border to the content wrapper */
+.content-wrapper  {
+  border: 1px solid  #ced0d6; /* Add a border to the content wrapper */
   padding: 10px; /* Add some padding for better visual separation */
   margin-bottom: 10px; /* Add some margin between content wrappers */
+  border-radius: 5px;
 }
 
-.left-container .row-wrapper,
-.right-container .row-wrapper {
+.row-wrapper {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.left-container .column,
-.right-container .column {
+.row-wrapper>* {
+  display: inline-block;
+}
+
+.header-wrapper {
+  justify-content: center;
+  align-items: center;
+}
+
+.column {
   flex-basis: auto;
 }
 
-.left-container h1,
-.right-container h1 {
+h1 {
   text-align: left;
+}
+
+li a {
+  text-overflow: ellipsis;
 }
 
 @media only screen and (max-width: 768px) {
@@ -131,6 +151,23 @@ button {
   .left-container,
   .right-container {
     flex-basis: 100%; /* Take full width on small screens */
+  }
+
+  .logo-image {
+    max-width: 70px; /* Set the maximum width to 100% of its container */
+    height: auto;    /* Allow the height to adjust proportionally */
+    margin-bottom: 10px; /* Adjust the margin to your preference */
+  }
+
+  h1 {
+    font-size: 24px; /* Adjust the font size to your preference */
+    margin-top: 0; /* Remove any default margin */
+  }
+
+  .row-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 }
 
