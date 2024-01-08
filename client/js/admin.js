@@ -25,6 +25,18 @@ const rdt = RadixDappToolkit({
 });
 console.log("dApp Toolkit: ", rdt)
 
+// Global states
+let componentAddress = import.meta.env.VITE_COMP_ADDRESS //LendingDApp component address on stokenet
+// You receive this badge(your resource address will be different) when you instantiate the component
+let admin_badge = import.meta.env.VITE_ADMIN_BADGE
+let owner_badge = import.meta.env.VITE_OWNER_BADGE
+let lnd_resourceAddress = import.meta.env.VITE_LND_RESOURCE_ADDRESS // XRD lender badge manager
+let lnd_tokenAddress = import.meta.env.VITE_LND_TOKEN_ADDRESS // LND token resource address
+
+let lnd_staffBadgeAddress = import.meta.env.VITE_STAFF_BADGE_ADDRESS
+
+let xrdAddress = import.meta.env.VITE_XRD //Stokenet XRD resource address
+
 let accountAddress
 let accountName
 let inputValue
@@ -38,6 +50,8 @@ rdt.walletApi.walletData$.subscribe((walletData) => {
   // document.getElementById('accountAddress').innerText = walletData.accounts[0].address
   accountName = walletData.accounts[0].label
   accountAddress = walletData.accounts[0].address
+
+  fetchExtraData(componentAddress);
 })
 
 // affected_global_entities: Array(9)
@@ -60,15 +74,158 @@ rdt.walletApi.walletData$.subscribe((walletData) => {
 // https://stokenet-dashboard.radixdlt.com/transaction/txid_tdx_2_1agezmpcyggzcn400nxxyej6r3px0c6sd4jswkpyhpculd5l4mu3s70d9l4/summary 
 
 
-// Global states
-let componentAddress = import.meta.env.VITE_COMP_ADDRESS //LendingDApp component address on stokenet
-// You receive this badge(your resource address will be different) when you instantiate the component
-let admin_badge = import.meta.env.VITE_ADMIN_BADGE
-let owner_badge = import.meta.env.VITE_OWNER_BADGE
-let lnd_resourceAddress = import.meta.env.VITE_LND_RESOURCE_ADDRESS // XRD lender badge manager
-let lnd_tokenAddress = import.meta.env.VITE_LND_TOKEN_ADDRESS // LND token resource address
+// ************ Utility Function (Gateway) *****************
+function generatePayload(method, address, type) {
+  let code;
+  switch (method) {
+    case 'ComponentConfig':
+      code = `{
+        "addresses": [
+          "${componentAddress}"
+        ],
+        "aggregation_level": "Global",
+        "opt_ins": {
+          "ancestor_identities": true,
+          "component_royalty_vault_balance": true,
+          "package_royalty_vault_balance": true,
+          "non_fungible_include_nfids": true,
+          "explicit_metadata": [
+            "name",
+            "description"
+          ]
+        }
+      }`;
+    break;
+    case 'UserPosition':
+      code = `{
+        "addresses": [
+          "${accountAddress}"
+        ],
+        "aggregation_level": "Vault",
+        "opt_ins": {
+          "ancestor_identities": true,
+          "component_royalty_vault_balance": true,
+          "package_royalty_vault_balance": true,
+          "non_fungible_include_nfids": true,
+          "explicit_metadata": [
+            "name",
+            "description"
+          ]
+        }
+      }`;
+    break;    
+    // Add more cases as needed
+    default:
+      throw new Error(`Unsupported method: ${method}`);
+  }
+  return code;
+}
 
-let xrdAddress = import.meta.env.VITE_XRD //Stokenet XRD resource address
+// *********** Fetch Component Config (/state/entity/details) (Gateway) ***********
+async function fetchExtraData(componentAddress) {
+  // Define the data to be sent in the POST request.
+  const requestData = generatePayload("ComponentConfig", "", "Global");
+
+  // Make an HTTP POST request to the gateway
+  fetch('https://stokenet.radixdlt.com/state/entity/details', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: requestData,
+  })
+  .then(response => response.json()) // Assuming the response is JSON data.
+  .then(data => { 
+    const json = data.items ? data.items[0] : null;
+
+    //get open borrowing
+    const openBorrowing = getLateBorrowers(json);
+    console.log("[admin] openBorrowing:", openBorrowing);
+  })
+  .catch(error => {
+      console.error('Error fetching data:', error);
+  });
+}
+
+function getLateBorrowers(data) {
+  const borrowersAccountsField = data.details.state.fields.find(field => field.field_name === "borrowers_accounts");
+  console.log("borrowers_accounts:", borrowersAccountsField);
+
+  // Check if the "borrowers_accounts" field exists
+  if (borrowersAccountsField) {
+    // Assuming each element is a Tuple with "fields" property
+    const rootFields = borrowersAccountsField.elements.map(element => {
+      // Assuming each element has "fields" property
+      return element.fields;
+    });
+
+    console.log("rootFields:", rootFields);
+
+    // Check if the "rootFields" array is not empty
+    if (rootFields.length > 0) {
+      // Assuming each "fields" has an array of items with a "value" field
+      const elementsFieldsArray = rootFields
+        .flatMap(item => item) // Flatten the array of arrays
+        .map(innerItem => innerItem.value);
+
+      // console.log("elementsFieldsArray:", elementsFieldsArray);
+
+      // Return the extracted values
+      return elementsFieldsArray;
+    }
+  }
+}
+
+// ***** Main function (elementId = divId del button, inputTextId = divId del field di inserimento, method = scrypto method) *****
+function createAskRepayTransactionOnClick(method) {
+  document.getElementById(method).onclick = async function () {
+
+    const lateBorrowers = getLateBorrowers(json);
+    // Iterate through the lateBorrowers and create a manifest for each one
+    lateBorrowers.forEach(borrower => {
+      const link = createAskRepayManifest(borrower);
+      console.log(`borrower manifest`, link);
+    });
+
+    let amountPerRecipient = 1;
+
+    const depositToLateBorrowers = lateBorrowers
+    .map(
+      (recipientAddress, index) => `TAKE_FROM_WORKTOP
+        Address("${resourceAddress}")
+        Decimal("${amountPerRecipient}")
+        Bucket("bucket_${index}")
+    ;
+    CALL_METHOD
+        Address("${recipientAddress}")
+        "try_deposit_or_abort"
+        Bucket("bucket_${index}")
+        Enum<0u8>()
+    ;` 
+    )
+    .join('');
+
+    const manifest = generateAskRepayManifest(method);
+
+    console.log(`${method} manifest`, manifest);
+    const result = await rdt.walletApi.sendTransaction({
+      transactionManifest: manifest,
+      version: 1,
+    });
+    if (result.isErr()) {
+      console.log(`${method} User Error: `, result.error);
+      throw result.error;
+    }
+  };
+}
+
+//for creating ask repay for a single borrower
+function generateAskRepayManifest(borrower) {
+  // Create a new manifest 
+  const manifest = 'create';
+
+  return manifest;
+}
 
 // ***** Main function (elementId = divId del button, inputTextId = divId del field di inserimento, method = scrypto method) *****
 function createTransactionOnClick(elementId, inputTextId, method) {
@@ -86,6 +243,33 @@ function createTransactionOnClick(elementId, inputTextId, method) {
       throw result.error;
     }
   };
+}
+
+
+function generateAskRepayManifest(method) {
+  let code;
+  switch (method) {
+    case 'askRepay':
+      code = ` 
+        CALL_METHOD
+          Address("${accountAddress}")
+          "create_proof_of_amount"    
+          Address("${owner_badge}")
+          Decimal("1");  
+        CALL_METHOD
+          Address("${componentAddress}")
+          "asking_repay"
+          Decimal("${inputValue}");
+        CALL_METHOD
+          Address("${accountAddress}")
+          "deposit_batch"
+          Expression("ENTIRE_WORKTOP");
+        `;
+    break;
+    // Add more cases as needed
+    default:
+      throw new Error(`Unsupported method: ${method}`);
+    }
 }
 
 function generateManifest(method, inputValue) {
@@ -253,3 +437,5 @@ createTransactionOnClick('extendBorrowingPool', 'extendBorrowingPoolAmount', 'ex
 createTransactionOnClick('setReward', 'reward', 'set_reward');
 createTransactionOnClick('setInterest', 'interest', 'set_interest');
 createTransactionOnClick('fundMainPool', 'numberOfFundedTokens', 'fund_main_pool');
+
+createAskRepayTransactionOnClick('askRepay');

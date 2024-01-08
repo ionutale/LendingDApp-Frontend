@@ -94,6 +94,7 @@ button {
   justify-content: space-between;
   padding-left: 1.33rem;
   padding-right: 1.33rem;
+  margin: 10px;
 }
 
 .header {  
@@ -109,9 +110,10 @@ button {
 
 .content-wrapper  {
   border: 1px solid  #ced0d6; /* Add a border to the content wrapper */
-  padding: 10px; /* Add some padding for better visual separation */
   margin-bottom: 10px; /* Add some margin between content wrappers */
   border-radius: 5px;
+  height: 100%;
+  flex-basis: 48%;
 }
 
 .row-wrapper {
@@ -120,6 +122,11 @@ button {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
+  padding: 0.5rem;
+}
+
+.simpler {
+  padding: 0.5rem;
 }
 
 .row-wrapper>* {
@@ -130,7 +137,7 @@ button {
   justify-content: center;
   align-items: center;
 }
-
+ 
 .column {
   flex-basis: auto;
 }
@@ -167,7 +174,6 @@ li a {
   .row-wrapper {
     display: flex;
     flex-direction: column;
-    align-items: center;
   }
 }
 

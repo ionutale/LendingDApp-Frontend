@@ -140,7 +140,7 @@ function createBorrowerLink(borrower) {
   link.href = 'https://stokenet-dashboard.radixdlt.com/account/' + borrower + '/nfts';
   link.target = '_new';
   link.className = 'number'; // Apply the same styling as the original link
-  link.innerText = borrower;
+  link.innerText = borrower.substring(borrower.length-10);
 
   // Create a div for each link
   // const div = document.createElement('div');
