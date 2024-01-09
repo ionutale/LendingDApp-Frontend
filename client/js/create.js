@@ -45,6 +45,8 @@ let componentAddress = import.meta.env.VITE_COMP_ADDRESS //LendingDApp component
 // You receive this badge(your resource address will be different) when you instantiate the component
 let admin_badge = import.meta.env.VITE_ADMIN_BADGE
 let owner_badge = import.meta.env.VITE_OWNER_BADGE
+let staff_badge = import.meta.env.VITE_STAFF_BADGE_ADDRESS
+let benefactor_badge = import.meta.env.VITE_BENEFACTOR_BADGE_ADDRESS
 let lnd_resourceAddress = import.meta.env.VITE_LND_RESOURCE_ADDRESS // XRD lender badge manager
 let lnd_tokenAddress = import.meta.env.VITE_LND_TOKEN_ADDRESS // LND token resource address
 
@@ -113,6 +115,14 @@ document.getElementById('instantiateComponent').onclick = async function () {
   // ****** Set owner_badge variable with gateway api getCommitReciept payload ******
   owner_badge = getCommitReceipt.transaction.affected_global_entities[3];
   document.getElementById('owner_badge').innerText = owner_badge;
+
+  // ****** Set staff_badge variable with gateway api getCommitReciept payload ******
+  staff_badge = getCommitReceipt.transaction.affected_global_entities[5];
+  document.getElementById('staff_badge').innerText = staff_badge;
+
+  // ****** Set benefactor_badge variable with gateway api getCommitReciept payload ******
+  benefactor_badge = getCommitReceipt.transaction.affected_global_entities[6];
+  document.getElementById('benefactor_badge').innerText = benefactor_badge;
 
   // ****** Set lnd_resourceAddress variable with gateway api getCommitReciept payload ******
   lnd_resourceAddress = getCommitReceipt.transaction.affected_global_entities[8];

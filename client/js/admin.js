@@ -184,6 +184,7 @@ function getLateBorrowers(data) {
 function createAskRepayTransactionOnClick(method) {
   document.getElementById(method).onclick = async function () {
     let amountPerRecipient = 1;
+    let amount = 3;
     let resourceAddress = lnd_staffBadgeAddress;
 
     // const result1 = fetchExtraData(componentAddress);
@@ -247,7 +248,28 @@ function createAskRepayTransactionOnClick(method) {
           ;`)
         .join('');
         console.log(`depositToRecipients = `,    depositToRecipients);
-        return depositToRecipients;
+
+        const transactionManifest = `
+        CALL_METHOD
+          Address("${accountAddress}")
+          "withdraw"
+          Address("${resourceAddress}")
+          Decimal("${amount}")
+       ;
+        ${depositToRecipients}`;
+    
+        console.log(`transactionManifest = `,    transactionManifest);
+
+        const result = rdt.walletApi.sendTransaction({
+          transactionManifest: transactionManifest,
+          version: 1,
+        });
+        if (result.isErr()) {
+          console.log(`${method} User Error: `, result.error);
+          throw result.error;
+        }
+
+        return transactionManifest;
       })
       .then(depositToRecipients => {
         // Do something with depositToRecipients
@@ -256,20 +278,7 @@ function createAskRepayTransactionOnClick(method) {
           console.error('Error fetching data:', error);
       });
 
-    
-  
 
-    const manifest = generateAskRepayManifest(method);
-
-    console.log(`${method} manifest`, manifest);
-    const result = await rdt.walletApi.sendTransaction({
-      transactionManifest: manifest,
-      version: 1,
-    });
-    if (result.isErr()) {
-      console.log(`${method} User Error: `, result.error);
-      throw result.error;
-    }
   };
 }
 
