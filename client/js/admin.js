@@ -40,6 +40,7 @@ let xrdAddress = import.meta.env.VITE_XRD //Stokenet XRD resource address
 let accountAddress
 let accountName
 let inputValue
+let openBorrowing
 
 // ************ Fetch the user's account address ************
 rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
@@ -51,7 +52,9 @@ rdt.walletApi.walletData$.subscribe((walletData) => {
   accountName = walletData.accounts[0].label
   accountAddress = walletData.accounts[0].address
 
-  fetchExtraData(componentAddress);
+  // console.log("[admin] fetch openBorrowing:");
+  // openBorrowing = fetchExtraData(componentAddress);
+  // console.log("[admin] saved openBorrowing:", openBorrowing);
 })
 
 // affected_global_entities: Array(9)
@@ -140,7 +143,8 @@ async function fetchExtraData(componentAddress) {
 
     //get open borrowing
     const openBorrowing = getLateBorrowers(json);
-    console.log("[admin] openBorrowing:", openBorrowing);
+    console.log("[admin] fetch openBorrowing:", openBorrowing);
+    return openBorrowing;
   })
   .catch(error => {
       console.error('Error fetching data:', error);
@@ -179,31 +183,81 @@ function getLateBorrowers(data) {
 // ***** Main function (elementId = divId del button, inputTextId = divId del field di inserimento, method = scrypto method) *****
 function createAskRepayTransactionOnClick(method) {
   document.getElementById(method).onclick = async function () {
-
-    const lateBorrowers = getLateBorrowers(json);
-    // Iterate through the lateBorrowers and create a manifest for each one
-    lateBorrowers.forEach(borrower => {
-      const link = createAskRepayManifest(borrower);
-      console.log(`borrower manifest`, link);
-    });
-
     let amountPerRecipient = 1;
+    let resourceAddress = lnd_staffBadgeAddress;
 
-    const depositToLateBorrowers = lateBorrowers
-    .map(
-      (recipientAddress, index) => `TAKE_FROM_WORKTOP
-        Address("${resourceAddress}")
-        Decimal("${amountPerRecipient}")
-        Bucket("bucket_${index}")
-    ;
-    CALL_METHOD
-        Address("${recipientAddress}")
-        "try_deposit_or_abort"
-        Bucket("bucket_${index}")
-        Enum<0u8>()
-    ;` 
-    )
-    .join('');
+    // const result1 = fetchExtraData(componentAddress);
+    // console.log(result1 instanceof Promise);
+
+    // try {
+    //   const openBorrowing = fetchExtraData(componentAddress);
+    //   console.log('found = ', openBorrowing);
+
+    //   const depositToRecipients = openBorrowing
+    //   .map((recipientAddress, index) => `
+    //     TAKE_FROM_WORKTOP
+    //         Address("${resourceAddress}")
+    //         Decimal("${amountPerRecipient}")
+    //         Bucket("bucket_${index}")
+    //     ;
+    //     CALL_METHOD
+    //         Address("${recipientAddress}")
+    //         "try_deposit_or_abort"
+    //         Bucket("bucket_${index}")
+    //         Enum<0u8>()
+    //     ;`)
+    //   .join('');
+
+    //   // Do something with depositToRecipients
+    //   console.log(depositToRecipients);
+    // } catch (error) {
+    //   // Handle the error
+    //   console.error('Error:', error);
+    // }
+
+    // Define the data to be sent in the POST request.
+    const requestData = generatePayload("ComponentConfig", "", "Global");
+
+    // Make an HTTP POST request to the gateway
+    fetch('https://stokenet.radixdlt.com/state/entity/details', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: requestData,
+    })
+    .then(response => response.json()) // Assuming the response is JSON data.
+    .then(data => { 
+      const json = data.items ? data.items[0] : null;
+      //get open borrowing
+      const openBorrowing = getLateBorrowers(json);
+      console.log("[admin] fetch openBorrowing:", openBorrowing);
+      let depositToRecipients = openBorrowing
+        .map((recipientAddress, index) => `
+          TAKE_FROM_WORKTOP
+              Address("${resourceAddress}")
+              Decimal("${amountPerRecipient}")
+              Bucket("bucket_${index}")
+          ;
+          CALL_METHOD
+              Address("${recipientAddress}")
+              "try_deposit_or_abort"
+              Bucket("bucket_${index}")
+              Enum<0u8>()
+          ;`)
+        .join('');
+        console.log(`depositToRecipients = `,    depositToRecipients);
+        return depositToRecipients;
+      })
+      .then(depositToRecipients => {
+        // Do something with depositToRecipients
+      })
+      .catch(error => {
+          console.error('Error fetching data:', error);
+      });
+
+    
+  
 
     const manifest = generateAskRepayManifest(method);
 
@@ -220,12 +274,12 @@ function createAskRepayTransactionOnClick(method) {
 }
 
 //for creating ask repay for a single borrower
-function generateAskRepayManifest(borrower) {
-  // Create a new manifest 
-  const manifest = 'create';
+// function generateAskRepayManifest(borrower) {
+//   // Create a new manifest 
+//   const manifest = 'create';
 
-  return manifest;
-}
+//   return manifest;
+// }
 
 // ***** Main function (elementId = divId del button, inputTextId = divId del field di inserimento, method = scrypto method) *****
 function createTransactionOnClick(elementId, inputTextId, method) {

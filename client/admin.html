@@ -22,8 +22,8 @@
     </div>
   </div>
 
-  <div class="big-container">
-    <div class="left-container">    
+  <section>
+    <div class="content-wrapper">    
       <h1>DApp Tuning</h1>
       Set the reward level for account providing liquidity (Admin or Owner badge needed)
       <p><button id="setReward">Set reward level</button></p>
@@ -31,35 +31,37 @@
         <input type="text" placeholder="Reward" id="reward">
       </div>
 
-      <br>
+      <br><br>
       Set the interest level for account borrowing liquidity (Admin or Owner badge needed)
       <p><button id="setInterest">Set interest level</button></p>
       <div class="number">
         <input type="text" placeholder="Interest" id="interest">
       </div>
 
-      <br>
+      <br><br>
       Sets the length of the period beyond which liquidity can be provided again (Admin or Owner badge needed)
       <p><button id="setPeriodLength">Sets the length of the period</button></p>
       <div class="number">
        <input type="text" placeholder="Sets Period Length" id="periodLength">
       </div>
 
-      <br>
+      <br><br>
       Extend the Lending Pool size by the specified number of token (Admin or Owner or Staff badge needed)
       <p><button id="extendLendingPool">Extend the Lending Pool size</button></p>
       <div class="number">
         <input type="text" placeholder="Extend the Lending Pool size" id="extendLendingPoolAmount">
       </div>
 
-      <br>
+      <br><br>
       Extend the Borrowing Pool size by the specified number of token (Admin or Owner or Staff badge needed)
       <p><button id="extendBorrowingPool">Extend the Borrowing Pool size</button></p>
       <div class="number">
         <input type="text" placeholder="Extend the Borrowing Pool size" id="extendBorrowingPoolAmount">
       </div>
       <br>
+    </div>
 
+    <div class="content-wrapper">   
       <h1>Administrative Function</h1>
       Withdraw Fund for the development of the project (Owner badge needed)
       <p><button id="WithdrawEarnings">Withdraw Fund</button></p>
@@ -67,7 +69,7 @@
         <input type="text" placeholder="Number of Token" id="numberOfEarnedToken">
       </div>
 
-      <br>
+      <br><br>
       Fund the main pool (Admin or Owner badge needed)
       <p><button id="fundMainPool">Fund</button></p> 
       <div class="number">
@@ -83,12 +85,13 @@
       </div>
 
       <br>
+      <h1>Late Borrowers</h1>
       Ask late borrowers to repay loans  (Admin or Owner badge needed)
       <p><button id="askRepay">Ask Loans repayments</button></p> 
 
     </div>
 
-  </div>
+  </section>
   
 
 </body>

@@ -8,6 +8,10 @@
 
   <link rel="stylesheet" href="css/style.css">
   <title>Lending dApp</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -16,14 +20,12 @@
   <script type="module" src="js/index.js"></script>
 
   <div class="big-container header">
-    <div class="content-wrapper">
-      <div class="row-wrapper header-wrapper" >
+      <div class="header-wrapper" >
         <img src="images/logoSlim.jpg" alt="Logo" class="logo-image"   />
         <h1> Uncollateralized Lending </h1>
         <div class="column">
           <radix-connect-button class="connectBtn"/>
         </div>
-      </div>
     </div>
   </div>
 
@@ -33,7 +35,7 @@
     <div class="number" id="registerTxResult"></div>
   </div>
 
-  <div class="big-container">
+  <section>
       <div class="content-wrapper">
         <div class="row-wrapper">
           <div class="column">
@@ -87,23 +89,26 @@
         </div>
       </div>
 
-  </div>
+  </section>
 
-  <div class="big-container">
+  <section>
       <div class="content-wrapper">
         <div class="row-wrapper">
           <div class="column">
             <h3>Your Position</h3>
-            Amount of your liquidity funded in the pool: <div class="number" id="amountLiquidityFunded"></div><br>
-            Epoch of supplying liquidity: <div class="number" id="epochLiquidityFunded"></div><br>
-            Epoch of redeeming liquidity: <div class="number" id="epochLiquidityReedemed"></div><br>
+
+            <p>Amount of your liquidity funded in the pool: <span class="number" id="amountLiquidityFunded"></span></p>
+            <p>Epoch of supplying liquidity: <span class="number" id="epochLiquidityFunded"></span></p>
+            <p>Epoch of redeeming liquidity:  <span class="number" id="epochLiquidityReedemed"></span></p>
+
             <br>
-            Amount of your borrowings: <div class="number" id="amountBorrowings"></div><br>
-            Epoch of borrow: <div class="number" id="epochBorrow"></div><br>
-            Epoch of repaying borrow: <div class="number" id="epochRepay"></div><br>
+            <p>Amount of your borrowings:  <span class="number" id="amountBorrowings"></span></p>
+            <p>Epoch of borrow:  <span class="number" id="epochBorrow"></span></p>
+            <p>Epoch of repaying borrow:  <span class="number" id="epochRepay"></span></p>
+
             <br>
             <!-- Next Epoch available for supplying new liquidity: <div class="number" id="epochLiquidityNext"></div> -->
-            Current Epoch: <div class="number" id="currentEpoch"></div>
+            <p>Current Epoch:  <span class="number" id="currentEpoch"></span></p>
           </div>
         </div>
       </div>        
@@ -118,27 +123,25 @@
             How interest is calculated (Fixed/TimeBased): <div class="number" id="rewardType"></div>
       
             <h3>Smart Contract Vaults</h3>
-            Amount of main liquidity pool:
-            <div class="number" id="mainPool"></div><br>
+            
+            <div >Amount of main liquidity pool: <span class="number" id="mainPool"></span></div>
+
+            <div >Amount of loans still accepted: <span class="number" id="lendinsPool"></span></div>
       
-            Amount of loans still accepted:
-            <div class="number" id="lendinsPool"></div><br>
+            <div >Max Amount of borrowings accepted: <span class="number" id="borrowingsPool"></span></div>
       
-            Max Amount of borrowings accepted:
-            <div class="number" id="borrowingsPool"></div><br>
+            <div >Amount of donations received: <span class="number" id="donationsPool"></span></div>
       
-            Amount of donations received:
-            <div class="number" id="donationsPool"></div><br>
-      
-            Amount of fee collected:
-            <div class="number" id="feePool"></div>
+            <div >Amount of fee collected: <span class="number" id="feePool"></span></div>
+
           </div>
         </div>
       </div>
-  </div>
+  </section>
 
-  <div class="big-container">
-      <div class="content-wrapper simpler">
+  <section>
+      <div class="content-wrapper">
+        <div class="row-wrapper">
           Fund the development of the project and you will be recognized as an honorable member !!
           <p><button id="fundDevelopment">Fund Development</button></p> 
           <div class="number">
@@ -146,21 +149,24 @@
           </div>
           <div class="number" id="fundTxResult"></div>
         </div>
+      </div>
         
         <div class="content-wrapper">
-          <h2>Current Borrowers</h2>
-          <ul id="borrowers-links-container"></ul>
+          <div class="row-wrapper">
+            <h3>Current Borrowers</h3>
+            <ul id="borrowers-links-container"></ul>
+          </div>
       </div>
 
-  </div>
+  </section>
 
 
-  <div class="big-container">
+  <section>
     <div class="content-wrapper">
       Copyright by Leonets
       <p><a href="https://docs-lending.stakingcoins.eu/">Documentation</a></p>
     </div>
-  </div>
+  </section>
 
 </div>
 

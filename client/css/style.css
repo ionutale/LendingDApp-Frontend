@@ -6,7 +6,7 @@ body {
   background-attachment: fixed;
   background-color: #FFFFFF;
   margin-bottom: 3.33rem;
-  font-size: 18px;
+  font-family: 'Open Sans', sans-serif;
   overflow-x: hidden;
 }
 
@@ -89,7 +89,7 @@ button {
   border-radius: .33rem;
 }
 
-.big-container {
+section {
   display: flex;
   justify-content: space-between;
   padding-left: 1.33rem;
@@ -136,6 +136,8 @@ button {
 .header-wrapper {
   justify-content: center;
   align-items: center;
+  display: flex;
+  border-bottom: 1px solid #333333;
 }
  
 .column {
@@ -151,7 +153,7 @@ li a {
 }
 
 @media only screen and (max-width: 768px) {
-  .big-container {
+  section {
     flex-direction: column; /* Stack containers vertically on small screens */
   }
 
@@ -167,8 +169,9 @@ li a {
   }
 
   h1 {
-    font-size: 24px; /* Adjust the font size to your preference */
+    font-size: 1rem; /* Adjust the font size to your preference */
     margin-top: 0; /* Remove any default margin */
+    text-align: center;
   }
 
   .row-wrapper {
