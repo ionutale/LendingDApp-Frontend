@@ -124,33 +124,6 @@ function generatePayload(method, address, type) {
   return code;
 }
 
-// *********** Fetch Component Config (/state/entity/details) (Gateway) ***********
-async function fetchExtraData(componentAddress) {
-  // Define the data to be sent in the POST request.
-  const requestData = generatePayload("ComponentConfig", "", "Global");
-
-  // Make an HTTP POST request to the gateway
-  fetch('https://stokenet.radixdlt.com/state/entity/details', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-      },
-      body: requestData,
-  })
-  .then(response => response.json()) // Assuming the response is JSON data.
-  .then(data => { 
-    const json = data.items ? data.items[0] : null;
-
-    //get open borrowing
-    const openBorrowing = getLateBorrowers(json);
-    console.log("[admin] fetch openBorrowing:", openBorrowing);
-    return openBorrowing;
-  })
-  .catch(error => {
-      console.error('Error fetching data:', error);
-  });
-}
-
 function getLateBorrowers(data) {
   const borrowersAccountsField = data.details.state.fields.find(field => field.field_name === "borrowers_accounts");
   console.log("borrowers_accounts:", borrowersAccountsField);
@@ -180,41 +153,12 @@ function getLateBorrowers(data) {
   }
 }
 
-// ***** Main function (elementId = divId del button, inputTextId = divId del field di inserimento, method = scrypto method) *****
+// ***** Main function (method = not needed) *****
 function createAskRepayTransactionOnClick(method) {
   document.getElementById(method).onclick = async function () {
     let amountPerRecipient = 1;
     let amount = 3;
     let resourceAddress = lnd_staffBadgeAddress;
-
-    // const result1 = fetchExtraData(componentAddress);
-    // console.log(result1 instanceof Promise);
-
-    // try {
-    //   const openBorrowing = fetchExtraData(componentAddress);
-    //   console.log('found = ', openBorrowing);
-
-    //   const depositToRecipients = openBorrowing
-    //   .map((recipientAddress, index) => `
-    //     TAKE_FROM_WORKTOP
-    //         Address("${resourceAddress}")
-    //         Decimal("${amountPerRecipient}")
-    //         Bucket("bucket_${index}")
-    //     ;
-    //     CALL_METHOD
-    //         Address("${recipientAddress}")
-    //         "try_deposit_or_abort"
-    //         Bucket("bucket_${index}")
-    //         Enum<0u8>()
-    //     ;`)
-    //   .join('');
-
-    //   // Do something with depositToRecipients
-    //   console.log(depositToRecipients);
-    // } catch (error) {
-    //   // Handle the error
-    //   console.error('Error:', error);
-    // }
 
     // Define the data to be sent in the POST request.
     const requestData = generatePayload("ComponentConfig", "", "Global");
@@ -247,16 +191,14 @@ function createAskRepayTransactionOnClick(method) {
               Enum<0u8>()
           ;`)
         .join('');
-        console.log(`depositToRecipients = `,    depositToRecipients);
-
         const transactionManifest = `
-        CALL_METHOD
-          Address("${accountAddress}")
-          "withdraw"
-          Address("${resourceAddress}")
-          Decimal("${amount}")
-       ;
-        ${depositToRecipients}`;
+          CALL_METHOD
+            Address("${accountAddress}")
+            "withdraw"
+            Address("${resourceAddress}")
+            Decimal("${amount}")
+        ;
+          ${depositToRecipients}`;
     
         console.log(`transactionManifest = `,    transactionManifest);
 
@@ -268,27 +210,339 @@ function createAskRepayTransactionOnClick(method) {
           console.log(`${method} User Error: `, result.error);
           throw result.error;
         }
-
         return transactionManifest;
-      })
-      .then(depositToRecipients => {
-        // Do something with depositToRecipients
       })
       .catch(error => {
           console.error('Error fetching data:', error);
       });
-
-
   };
 }
 
-//for creating ask repay for a single borrower
-// function generateAskRepayManifest(borrower) {
-//   // Create a new manifest 
-//   const manifest = 'create';
+class BondHolder {
+  constructor(nonFungibleId, vaultAddresses, resourceAddress, address, holderAddress) {
+    this.nonFungibleId = nonFungibleId;
+    this.vaultAddresses = vaultAddresses;
+    this.resourceAddress = resourceAddress;
+    this.address = address;
+    this.holderAddress = holderAddress;
+  }
+}
 
-//   return manifest;
-// }
+
+// *********** Fetch User NFT Metadata Information (/non-fungible/ids) (Gateway Utility) ***********
+async function fetchNonFungibleCollectionIds(resourceAddress) {
+  // Define the data to be sent in the GET request.
+  const requestData = `{
+    "resource_address": "${resourceAddress}"
+  }`;
+  // Make an HTTP POST request to the gateway
+  fetch('https://stokenet.radixdlt.com/state/non-fungible/ids', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: requestData,
+  })
+  .then(response => response.json()) 
+  .then(data => { 
+    // Extracting values from the nested structure
+    const nftIds = [];
+    console.info('fetchNonFungibleCollectionIds:', data);
+    data.non_fungible_ids.forEach((id) => {
+      id.data.programmatic_json.fields.forEach((field) => {
+        const { field_name, value } = field;
+        nftIds.push({ field_name, value });
+      });
+    });
+    return nftIds;
+  })
+  .catch(error => {
+      console.error('Error fetching data:', error);
+  });
+}
+
+
+// *********** Fetch User NFT Metadata Information (/non-fungible/location) (Gateway Utility) ***********
+async function fetchNonFungibleLocation(resourceAddress, items) {
+  // Define the data to be sent in the GET request.
+  const requestData = `{
+    "resource_address": "${resourceAddress}",
+    "non_fungible_ids": [
+      "${items}"
+    ]
+  }`;
+  // Make an HTTP POST request to the gateway
+  fetch('https://stokenet.radixdlt.com/state/non-fungible/location', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: requestData,
+  })
+  .then(response => response.json()) 
+  .then(data => { 
+    // Extracting values from the nested structure
+    const nftIds = [];
+
+    data.non_fungible_ids.forEach((id) => {
+      id.data.programmatic_json.fields.forEach((field) => {
+        const { field_name, value } = field;
+        nftIds.push({ field_name, value });
+      });
+    });
+    return nftIds;
+  })
+  .catch(error => {
+      console.error('Error fetching data:', error);
+  });
+}
+
+function test() {
+  let selectedNfResource = lnd_staffBadgeAddress;
+  let selectedBondHolders = [];
+  let selectedFromAccount = 'idontknow';
+  selectedBondHolders =
+      rdt.gatewayApi.state
+        .getNonFungibleIds(selectedNfResource)
+        .then(({ items: ids }) => {
+          return rdt.gatewayApi.state
+            .getNonFungibleLocation(selectedNfResource, ids)
+            .then((locationResponse) => {
+              const vaultAddresses = locationResponse
+                .map((item) => item.owning_vault_address);
+                // .filter((item): item is string => !!item);
+
+              const locationMap = locationResponse.reduce((acc, item, index) => {
+                if (item.owning_vault_address) {
+                  if (acc[item.owning_vault_address]) acc[item.owning_vault_address].push(item);
+                  else acc[item.owning_vault_address] = [item];
+                }
+                return acc;
+              }, {});
+              
+
+              return rdt.gatewayApi.state
+                .getEntityDetailsVaultAggregated(vaultAddresses, {
+                  ancestorIdentities: true
+                })
+                .then((entityDetailResponse) => {
+                  return entityDetailResponse
+                    .map((item) => {
+                      const items = locationMap[item.address];
+                      console.log("[admin] items:", items);
+
+                      return items.map(({ non_fungible_id: nonFungibleId }) => ({
+                        nonFungibleId,
+                        vaultAddresses: item.address,
+                        resourceAddress: selectedNfResource,
+                        address: `${selectedNfResource}:${nonFungibleId}`,
+                        holderAddress: item.ancestor_identities.owner_address
+                      }));
+                    })
+                    .flat(2);
+                })
+                .then((items) => {
+                  console.log("[admin] items:", items);
+                  let bondHolders = items.filter((item) => item.holderAddress !== selectedFromAccount);
+                  console.log("[admin] bondHolders:", bondHolders);
+                  return bondHolders;
+                });
+            });
+        });
+  console.log("[admin] selectedBondHolders:", selectedBondHolders);
+  return selectedBondHolders;
+}
+
+// ***** Main function (method = not needed) *****
+function createReleaseLateBorrowersTransactionOnClick(method) {
+  document.getElementById(method).onclick = async function () {
+    let amountPerRecipient = 1;
+    let amount = 3;
+    let resourceAddress = lnd_staffBadgeAddress;
+    let proofResourceAddress = lnd_staffBadgeAddress;
+
+    //TODO
+    // let nftIds = fetchNonFungibleCollectionIds(resourceAddress);
+    // let vaultAddresses = fetchNonFungibleLocation(resourceAddress, nftIds);
+
+    let id1 = "d6b59793cf570363-16103b0852d02395-8393196644fd636b-ef89d3bea34eb579";
+    let acc1 = "account_tdx_2_128gpncka85tmpztygfc7ewjrzvvgyc9mlnc47uxtxlk0av0ngp2anz";
+    let id4 = "a04d4446076e440b-c16c11b7ddb86c34-46363fdf833b8dfa-cbd30e60fee42902";
+    let acc4 = "account_tdx_2_12y0nsx972ueel0args3jnapz9qtexyj9vpfqtgh3th4v8z04zht7jl";
+    let id5 = "21ceb961cc9d41a6-a88e545f31c571b4-2353abb9a4b2b5cf-f72335cffe60b348";
+    let acc5 = "account_tdx_2_129ukpx6au0ww4d5yfhhxzs9y7jurzad36qvu7c55pucsq5d52gcelf";
+    let bondHolders0 = [
+      new BondHolder(id4, "vault2", resourceAddress, id1, acc4),
+      new BondHolder(id5, "vault2", resourceAddress, id1, acc5)
+      // ... more instances as needed
+    ];
+    let bondHoldersPromise = test(resourceAddress);
+    let bondHolders = bondHoldersPromise.then(firstResult => {
+      console.log("[admin] bondHoldersPromise:", firstResult);
+      let bondHolders = firstResult;
+      // Now you can work with bondHolders
+      console.log("[admin] bondHolders:", bondHolders);
+
+      const bondsToRecall = bondHolders.map((item) => ({
+        vaultAddress: item.vaultAddresses,
+        bondNftId: item.nonFungibleId
+      }));
+      console.log("[admin] bondsToRecall:", bondsToRecall);
+      
+      const recallBonds = bondsToRecall
+        .map(
+          ({ vaultAddress, bondNftId }) => `
+          RECALL_NON_FUNGIBLES_FROM_VAULT 
+              Address("${vaultAddress}") 
+              Array<NonFungibleLocalId>(
+                  NonFungibleLocalId("${bondNftId}"),
+              )
+          ;
+          `
+        )
+        .join('');
+      console.log("[admin] recallBonds:", recallBonds);
+    
+      const NonFungibleLocalIds = bondsToRecall
+        .map(({ bondNftId }) => `NonFungibleLocalId("${bondNftId}")`)
+        .join(', ');
+      console.log("[admin] NonFungibleLocalIds:", NonFungibleLocalIds);
+    
+      //TODO perchè nella v. originale era NonFungibleLocalId("${proofId}")
+      //ho sostituito con NonFungibleLocalId("${NonFungibleLocalIds}")
+      let transactionManifest =  `
+      CALL_METHOD
+          Address("${accountAddress}")
+          "create_proof_of_non_fungibles"
+          Address("${proofResourceAddress}")
+          Array<NonFungibleLocalId>(
+              NonFungibleLocalId("${NonFungibleLocalIds}")
+          )
+      ;
+      ${recallBonds}
+      TAKE_NON_FUNGIBLES_FROM_WORKTOP
+          Address("${resourceAddress}")
+          Array<NonFungibleLocalId>(
+              ${NonFungibleLocalIds}
+          )
+          Bucket("bucket_of_bonds")
+      ;
+      CALL_METHOD
+          Address("${accountAddress}")
+          "try_deposit_or_abort"
+          Bucket("bucket_of_bonds")
+          Enum<0u8>()
+      ;`;
+  
+      console.log(`transactionManifest = `,    transactionManifest);
+  
+      const result = rdt.walletApi.sendTransaction({
+        transactionManifest: transactionManifest,
+        version: 1,
+      });
+      if (result.isErr()) {
+        console.log(`${method} User Error: `, result.error);
+        throw result.error;
+      }
+
+    })
+    .catch(error => {
+      console.error("[admin] Error:", error);
+    });
+
+    // console.log("[admin] bondHolders type:", Array.isArray(bondHolders) ? "Array" : "Not an Array");
+    // console.log("[admin] First element:", bondHolders[0]);
+    // console.log("[admin] create tx manifest:", bondHolders);
+    
+
+
+
+
+    
+
+
+    // Define the data to be sent in the POST request.
+    const requestData = generatePayload("ComponentConfig", "", "Global");
+
+    // Make an HTTP POST request to the gateway
+    fetch('https://stokenet.radixdlt.com/state/entity/details', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: requestData,
+    })
+    .then(response => response.json()) // Assuming the response is JSON data.
+    .then(data => { 
+      const json = data.items ? data.items[0] : null;
+      //get open borrowing
+      const openBorrowing = getLateBorrowers(json);
+      console.log("[admin] fetch openBorrowing:", openBorrowing);
+
+      const bondsToRecall = bondHolders.map((item) => ({
+        vaultAddress: item.vaultAddresses,
+        bondNftId: item.nonFungibleId
+      }));
+      
+      const recallBonds = bondsToRecall
+        .map(
+          ({ vaultAddress, bondNftId }) => `
+          RECALL_NON_FUNGIBLES_FROM_VAULT 
+              Address("${vaultAddress}") 
+              Array<NonFungibleLocalId>(
+                  NonFungibleLocalId("${bondNftId}"),
+              )
+          ;
+          `
+        )
+        .join('');
+    
+      const NonFungibleLocalIds = bondsToRecall
+        .map(({ bondNftId }) => `NonFungibleLocalId("${bondNftId}")`)
+        .join(', ');
+    
+      let transactionManifest =  `
+      CALL_METHOD
+          Address("${accountAddress}")
+          "create_proof_of_non_fungibles"
+          Address("${proofResourceAddress}")
+          Array<NonFungibleLocalId>(
+              NonFungibleLocalId("${proofId}")
+          )
+      ;
+      ${recallBonds}
+      TAKE_NON_FUNGIBLES_FROM_WORKTOP
+          Address("${resourceAddress}")
+          Array<NonFungibleLocalId>(
+              ${NonFungibleLocalIds}
+          )
+          Bucket("bucket_of_bonds")
+      ;
+      CALL_METHOD
+          Address("${accountAddress}")
+          "try_deposit_or_abort"
+          Bucket("bucket_of_bonds")
+          Enum<0u8>()
+      ;`;
+
+      console.log(`transactionManifest = `,    transactionManifest);
+
+      const result = rdt.walletApi.sendTransaction({
+        transactionManifest: transactionManifest,
+        version: 1,
+      });
+      if (result.isErr()) {
+        console.log(`${method} User Error: `, result.error);
+        throw result.error;
+      }
+      return transactionManifest;
+
+    })
+    .catch(error => {
+        console.error('Error fetching data:', error);
+    });
+  };
+}
 
 // ***** Main function (elementId = divId del button, inputTextId = divId del field di inserimento, method = scrypto method) *****
 function createTransactionOnClick(elementId, inputTextId, method) {
@@ -502,3 +756,7 @@ createTransactionOnClick('setInterest', 'interest', 'set_interest');
 createTransactionOnClick('fundMainPool', 'numberOfFundedTokens', 'fund_main_pool');
 
 createAskRepayTransactionOnClick('askRepay');
+createReleaseLateBorrowersTransactionOnClick('releaseLateBorrowers');
+
+
+
