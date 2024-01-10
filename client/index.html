@@ -19,6 +19,52 @@
   <script type="module" src="js/gateway.js"></script>
   <script type="module" src="js/index.js"></script>
 
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Get the current date
+      var currentDate = new Date().toISOString().split('T')[0];
+    
+      // Calculate the date 20 days from now
+      var maxDate = new Date();
+      maxDate.setDate(maxDate.getDate() + 20);
+      var maxDateString = maxDate.toISOString().split('T')[0];
+    
+      // Set the minimum and maximum date values
+      document.getElementById("endEpochBorrow").setAttribute("value", currentDate);
+      document.getElementById("endEpochBorrow").setAttribute("min", currentDate);
+      document.getElementById("endEpochBorrow").setAttribute("max", maxDateString);
+    });
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        // Add event listener for date input change
+        document.getElementById("endEpochBorrow").addEventListener("change", function() {
+          // Get the current date
+          var currentDate = new Date();
+
+          // Get the selected date
+          var selectedDate = new Date(this.value);
+
+          // Check if the date is valid
+          if (!isNaN(selectedDate.getTime())) {
+            
+            // Calculate the difference in minutes
+            var differenceInMinutes = Math.round((selectedDate - currentDate) / (1000 * 60));
+
+            // Convert the difference into multiples of 5 minutes
+            var expectedBorrowLength = Math.round(differenceInMinutes / 5);
+            console.info("expectedBorrowLength", expectedBorrowLength);
+
+            // Set the value in the hidden field
+            document.getElementById("expectedBorrowLength").value = expectedBorrowLength;
+          } else {
+            // Handle invalid date input
+            console.error("Invalid date input");
+          }
+        });
+      });
+    </script>
+
   <div class="big-container header">
       <div class="header-wrapper" >
         <img src="images/logoSlim.jpg" alt="Logo" class="logo-image"   />
@@ -69,8 +115,9 @@
             Please provide a time when the borrowing will be repaid and you'll receive a CreditScore NFT !</p>
             <p><button id="borrow">Borrow</button></p>
             <div class="number">
-                <input type="text" placeholder="Number of Token" id="numberOfRequestedXrdTokens"><br>
-                <input type="text" placeholder="N° of epochs within which the loan will be repaid" id="expectedBorrowLength">
+                <input type="text" placeholder="Number of Token" id="numberOfRequestedXrdTokens">
+                <input type="hidden" placeholder="N° of epochs within which the loan will be repaid" id="expectedBorrowLength">
+                deadline for repayment <input type="date" id="endEpochBorrow" name="endEpochBorrow"  />
                 <input type="hidden" placeholder="Account address" id="accountAddress">
             </div>
             <div class="number" id="borrowTxResult"></div>
@@ -116,24 +163,21 @@
         <div class="row-wrapper">    
           <div class="column">
             <h3>Current Pool Configuration</h3>
-            Reward for liquidity funding: <div class="number" id="rewardForYou"></div><br>
+
+            <p>Reward for liquidity funding: <span class="number" id="rewardForYou"></span></p>
+            <p>Interest for borrowing liquidity: <span class="number" id="interestForYou"></span></p>
+            <p>How interest is calculated (Fixed/TimeBased): <span class="number" id="rewardType"></span></p>
+
             <!-- Length of the period beyond which liquidity can be provided again: 
             <div class="number" id="periodLengthConfig"></div> -->
-            Interest for borrowing liquidity: <div class="number" id="interestForYou"></div><br>
-            How interest is calculated (Fixed/TimeBased): <div class="number" id="rewardType"></div>
       
             <h3>Smart Contract Vaults</h3>
             
-            <div >Amount of main liquidity pool: <span class="number" id="mainPool"></span></div>
-
-            <div >Amount of loans still accepted: <span class="number" id="lendinsPool"></span></div>
-      
-            <div >Max Amount of borrowings accepted: <span class="number" id="borrowingsPool"></span></div>
-      
-            <div >Amount of donations received: <span class="number" id="donationsPool"></span></div>
-      
-            <div >Amount of fee collected: <span class="number" id="feePool"></span></div>
-
+            <p>Amount of main liquidity pool: <span class="number" id="mainPool"></span></p>
+            <p>Amount of loans still accepted: <span class="number" id="lendinsPool"></span></p>
+            <p>Max Amount of borrowings accepted: <span class="number" id="borrowingsPool"></span></p>
+            <p>Amount of donations received: <span class="number" id="donationsPool"></span></p>
+            <p>Amount of fee collected: <span class="number" id="feePool"></span></p>
           </div>
         </div>
       </div>

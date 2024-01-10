@@ -359,7 +359,7 @@ function createReleaseLateBorrowersTransactionOnClick(method) {
     let amountPerRecipient = 1;
     let amount = 3;
     let resourceAddress = lnd_staffBadgeAddress;
-    let proofResourceAddress = lnd_staffBadgeAddress;
+    let proofResourceAddress = admin_badge;
 
     //TODO
     // let nftIds = fetchNonFungibleCollectionIds(resourceAddress);
@@ -409,16 +409,13 @@ function createReleaseLateBorrowersTransactionOnClick(method) {
       console.log("[admin] NonFungibleLocalIds:", NonFungibleLocalIds);
     
       //TODO perchè nella v. originale era NonFungibleLocalId("${proofId}")
-      //ho sostituito con NonFungibleLocalId("${NonFungibleLocalIds}")
+      //ho sostituito con ${NonFungibleLocalIds}
       let transactionManifest =  `
       CALL_METHOD
           Address("${accountAddress}")
-          "create_proof_of_non_fungibles"
-          Address("${proofResourceAddress}")
-          Array<NonFungibleLocalId>(
-              NonFungibleLocalId("${NonFungibleLocalIds}")
-          )
-      ;
+          "create_proof_of_amount"
+          Address("${admin_badge}")
+          Decimal("1");
       ${recallBonds}
       TAKE_NON_FUNGIBLES_FROM_WORKTOP
           Address("${resourceAddress}")
