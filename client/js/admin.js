@@ -34,6 +34,7 @@ let lnd_resourceAddress = import.meta.env.VITE_LND_RESOURCE_ADDRESS // XRD lende
 let lnd_tokenAddress = import.meta.env.VITE_LND_TOKEN_ADDRESS // LND token resource address
 
 let lnd_staffBadgeAddress = import.meta.env.VITE_STAFF_BADGE_ADDRESS
+let lnd_badPayerResourceAddress = import.meta.env.VITE_BAD_PAYER_RESOURCE_ADDRESS
 
 let xrdAddress = import.meta.env.VITE_XRD //Stokenet XRD resource address
 
@@ -102,17 +103,16 @@ function generatePayload(method, address, type) {
 }
 
 function getLateBorrowers(data) {
-  const borrowersAccountsField = data.details.state.fields.find(field => field.field_name === "borrowers_accounts");
-  console.log("borrowers_accounts:", borrowersAccountsField);
+  const latePayersAccountsField = data.details.state.fields.find(field => field.field_name === "late_payers_accounts");
+  console.log("late_payers_accounts:", latePayersAccountsField);
 
-  // Check if the "borrowers_accounts" field exists
-  if (borrowersAccountsField) {
+  // Check if the "late_payers_accounts" field exists
+  if (latePayersAccountsField) {
     // Assuming each element is a Tuple with "fields" property
-    const rootFields = borrowersAccountsField.elements.map(element => {
+    const rootFields = latePayersAccountsField.elements.map(element => {
       // Assuming each element has "fields" property
-      return element.fields;
+      return element;
     });
-
     console.log("rootFields:", rootFields);
 
     // Check if the "rootFields" array is not empty
@@ -121,8 +121,6 @@ function getLateBorrowers(data) {
       const elementsFieldsArray = rootFields
         .flatMap(item => item) // Flatten the array of arrays
         .map(innerItem => innerItem.value);
-
-      // console.log("elementsFieldsArray:", elementsFieldsArray);
 
       // Return the extracted values
       return elementsFieldsArray;
@@ -135,7 +133,7 @@ function createAskRepayTransactionOnClick(method) {
   document.getElementById(method).onclick = async function () {
     let amountPerRecipient = 1;
     let amount = 3;
-    let resourceAddress = lnd_staffBadgeAddress;
+    let resourceAddress = lnd_badPayerResourceAddress;
 
     // Define the data to be sent in the POST request.
     const requestData = generatePayload("ComponentConfig", "", "Global");
@@ -206,8 +204,7 @@ function createAskRepayTransactionOnClick(method) {
 //   }
 // }
 
-function fetchDataAndNftId() {
-  let selectedNfResource = lnd_staffBadgeAddress;
+function fetchDataAndNftId(selectedNfResource) {
   let nftHolders = [];
   let selectedFromAccount = 'idontknow';
   nftHolders =
@@ -259,7 +256,7 @@ function fetchDataAndNftId() {
 // ***** Main function (method = not needed) *****
 function createReleaseLateBorrowersTransactionOnClick(method) {
   document.getElementById(method).onclick = async function () {
-    let resourceAddress = lnd_staffBadgeAddress;
+    let resourceAddress = lnd_badPayerResourceAddress;
 
     let nftHoldersPromise = fetchDataAndNftId(resourceAddress);
     nftHoldersPromise.then(firstResult => {
