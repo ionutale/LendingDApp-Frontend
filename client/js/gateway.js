@@ -401,6 +401,7 @@ async function fetchNftMetadata(resourceAddress, item) {
     //borrow id
     const amountBorrowingsDiv = document.getElementById("amountBorrowings");
     const epochBorrowDiv = document.getElementById("epochBorrow");
+    const expectedEpochBorrowDiv = document.getElementById("expectedEpochBorrow");
     const epochRepayDiv = document.getElementById("epochRepay");
     //next epoch
     //const epochLiquidityNextDiv = document.getElementById("epochLiquidityNext");
@@ -416,6 +417,8 @@ async function fetchNftMetadata(resourceAddress, item) {
     amountBorrowingsDiv.textContent = extractedValues.find(field => field.field_name === "borrow_amount").value;
     const epochBorrowValue = parseFloat(extractedValues.find(field => field.field_name === "start_borrow_epoch").value) || 0;;
     epochBorrowDiv.textContent = epochBorrowValue;
+    const expectedEpochBorrowValue = parseFloat(extractedValues.find(field => field.field_name === "expected_end_borrow_epoch").value) || 0;;
+    expectedEpochBorrowDiv.textContent = expectedEpochBorrowValue
     epochRepayDiv.textContent = extractedValues.find(field => field.field_name === "end_borrow_epoch").value
     // update the sum
     // const currentValueEpochLength = parseFloat(periodLengthConfig.textContent) || 0; 
