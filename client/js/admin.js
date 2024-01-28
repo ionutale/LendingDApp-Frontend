@@ -216,7 +216,7 @@ function fetchDataAndNftId(selectedNfResource) {
             .then((locationResponse) => {
               const vaultAddresses = locationResponse
                 .map((item) => item.owning_vault_address);
-                // .filter((item): item is string => !!item);
+                .filter((item): item is string => !!item);
 
               const locationMap = locationResponse.reduce((acc, item, index) => {
                 if (item.owning_vault_address) {

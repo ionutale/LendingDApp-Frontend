@@ -31,7 +31,9 @@
   </div>
 
   <div class="content-container">
-    <p>Registering here you'll be able to supply/borrow liquidity in/from the pool  </p>
+    <p>Registering here you'll be able to supply/borrow liquidity in/from the pool
+      <br><br>
+      You will receive a CreditScore NFT where your position will be registered</p>
     <p>&nbsp;<button id="register">Register</button></p>
     <div class="number" id="registerTxResult"></div>
   </div>
@@ -67,7 +69,8 @@
           <div class="column">
             <h3>Borrow</h3>
             <p>Borrow liquidity (max 3% of the main pool until the max borrowing limit has not been reached) !
-            Please provide a time when the borrowing will be repaid and you'll receive a CreditScore NFT !</p>
+            <br>Please provide a time when the borrowing will be repaid ! 
+            <br>Be sure to repay otherwise you'll receive a BadPayer NFT !</p>
             <p><button id="borrow">Borrow</button></p>
             <div class="number">
                 <input type="text" placeholder="Number of Token" id="numberOfRequestedXrdTokens">
@@ -123,6 +126,8 @@
             <p>Reward for liquidity funding: <span class="number" id="rewardForYou"></span></p>
             <p>Interest for borrowing liquidity: <span class="number" id="interestForYou"></span></p>
             <p>How interest is calculated (Fixed/TimeBased): <span class="number" id="rewardType"></span></p>
+            <p>Fees: <span class="number" id="fees">10 xrd for each operation (Withdraw, Borrow, Repay)</span></p>
+            <p>Fees: <span class="number" id="fees">0 xrd for each operation (Supply)</span></p>
 
             <!-- Length of the period beyond which liquidity can be provided again: 
             <div class="number" id="periodLengthConfig"></div> -->
