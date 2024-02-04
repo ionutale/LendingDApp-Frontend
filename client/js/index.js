@@ -1,14 +1,14 @@
-import { RadixDappToolkit, DataRequestBuilder, RadixNetwork, NonFungibleIdType } from '@radixdlt/radix-dapp-toolkit'
+import { RadixDappToolkit, DataRequestBuilder, RadixNetwork, NonFungibleIdType, OneTimeDataRequestBuilder } from '@radixdlt/radix-dapp-toolkit'
 // You can create a dApp definition in the dev console at https://stokenet-console.radixdlt.com/dapp-metadata 
 // then use that account for your dAppId
 // Set an environment variable to indicate the current environment
 const environment = process.env.NODE_ENV || 'Stokenet'; // Default to 'development' if NODE_ENV is not set
-console.log("environment : ", environment)
+console.log("environment (index.js): ", environment)
 
 // Define constants based on the environment
-let dAppId, networkId;
+let dAppId, networkId, gwUrl;
 
-if (environment === 'production') {
+if (environment == 'production') {
   dAppId = import.meta.env.VITE_DAPP_ID
   networkId = RadixNetwork.Mainnet;
 } else {
@@ -17,6 +17,9 @@ if (environment === 'production') {
   //  'account_tdx_2_12870m7gklv3p90004zjnm39jrhpf2vseejrgpncptl7rhsagz8yjm9';
   networkId = RadixNetwork.Stokenet;
 }
+gwUrl = import.meta.env.VITE_GATEWAY_URL;
+console.log("gw url (index.js): ", gwUrl)
+console.log("networkId (index.js): ", networkId)
 
 // Instantiate DappToolkit
 const rdt = RadixDappToolkit({
@@ -74,6 +77,8 @@ function createTransactionOnClick(elementId, inputTextId, inputTextId2, method, 
     if (result.isErr()) {
       console.log(`${method} User Error: `, result.error);
       document.getElementById(errorField).textContent = extractErrorMessage(result.error.message);
+      // Highlight in red color
+      document.getElementById(errorField).style.color = "red";
       throw result.error;
     }
 
@@ -95,6 +100,8 @@ function createTransactionOnButtonClick(elementId, method, errorField) {
     if (result.isErr()) {
       console.log(`${method} User Error: `, result.error);
       document.getElementById(errorField).textContent = extractErrorMessage(result.error.message);
+      // Highlight in red color
+      document.getElementById(errorField).style.color = "red";
       throw result.error;
     }
 
@@ -138,14 +145,34 @@ function generateManifest(method, inputValue, inputValue2) {
     case 'register':
       code = ` 
         CALL_METHOD
+          Address("${accountAddress}")
+          "withdraw"    
+          Address("${lnd_resourceAddress}")
+          Decimal("1");
+        TAKE_ALL_FROM_WORKTOP
+          Address("${lnd_resourceAddress}")
+          Bucket("nft");    
+        CALL_METHOD
           Address("${componentAddress}")
-          "register";
+          "register"
+          Bucket("nft");
         CALL_METHOD
           Address("${accountAddress}")
           "deposit_batch"
           Expression("ENTIRE_WORKTOP");
       `;
       break;
+    case 'unregister':
+      code = ` 
+        CALL_METHOD
+          Address("${componentAddress}")
+          "unregister";
+        CALL_METHOD
+          Address("${accountAddress}")
+          "deposit_batch"
+          Expression("ENTIRE_WORKTOP");
+      `;
+      break;      
     case 'takes_back':
       code = `
         CALL_METHOD
@@ -341,6 +368,7 @@ function generateManifest(method, inputValue, inputValue2) {
 // Usage
 // createTransactionOnClick (elementId = divId del button, inputTextId = divId del field di inserimento, method = scrypto method)
 createTransactionOnButtonClick('register', 'register', 'registerTxResult');
+// createTransactionOnButtonClick('unregister', 'unregister', 'unregisterTxResult');
 createTransactionOnClick('lendTokens', 'numberOfTokens', 'accountAddress', 'lend_tokens', 'lendTxResult');
 createTransactionOnClick('takes_back', 'numberOfLndTokens', 'accountAddress', 'takes_back', 'takeBackTxResult');
 

@@ -15,7 +15,8 @@
     "vite": "^4.1.0"
   },
   "dependencies": {
-    "@radixdlt/radix-dapp-toolkit": "^1.2.0",
+    "@radixdlt/radix-dapp-toolkit": "^1.4.3",
+    "@radixdlt/connect-button": "^1.0.4",
     "fs": "^0.0.1-security"
   }
 }

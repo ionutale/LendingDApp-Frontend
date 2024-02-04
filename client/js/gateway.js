@@ -3,18 +3,22 @@ import { RadixDappToolkit, DataRequestBuilder, RadixNetwork, NonFungibleIdType }
 // then use that account for your dAppId
 // Set an environment variable to indicate the current environment
 const environment = process.env.NODE_ENV || 'Stokenet'; // Default to 'development' if NODE_ENV is not set
-console.log("environment : ", environment)
+console.log("environment (gateway.js): ", environment)
 // Define constants based on the environment
-let dAppId, networkId;
+let dAppId, networkId, gwUrl;
 
-if (environment === 'production') {
+if (environment == 'production') {
   dAppId = import.meta.env.VITE_DAPP_ID
   networkId = RadixNetwork.Mainnet;
+  gwUrl = import.meta.env.VITE_GATEWAY_URL;
 } else {
   // Default to Stokenet configuration
   dAppId = import.meta.env.VITE_DAPP_ID
   networkId = RadixNetwork.Stokenet;
+  gwUrl = import.meta.env.VITE_GATEWAY_URL;
 }
+console.log("gw url (gateway.js): ", gwUrl)
+console.log("networkId (gateway.js): ", networkId)
 
 // Instantiate DappToolkit
 const rdt = RadixDappToolkit({

@@ -3,18 +3,22 @@ import { RadixDappToolkit, DataRequestBuilder, RadixNetwork } from '@radixdlt/ra
 // then use that account for your dAppId
 // Set an environment variable to indicate the current environment
 const environment = process.env.NODE_ENV || 'Stokenet'; // Default to 'development' if NODE_ENV is not set
-console.log("environment : ", environment)
+console.log("environment (admin.js): ", environment)
 // Define constants based on the environment
-let dAppId, networkId;
+let dAppId, networkId, gwUrl;
 
 if (environment === 'production') {
   dAppId = import.meta.env.VITE_DAPP_ID
   networkId = RadixNetwork.Mainnet;
+  gwUrl = import.meta.env.VITE_GATEWAY_URL;
 } else {
   // Default to Stokenet configuration
   dAppId = import.meta.env.VITE_DAPP_ID
   networkId = RadixNetwork.Stokenet;
+  gwUrl = import.meta.env.VITE_GATEWAY_URL;
 }
+console.log("gw url (admin.js): ", gwUrl)
+console.log("networkId (admin.js): ", networkId)
 
 // Instantiate DappToolkit
 const rdt = RadixDappToolkit({
@@ -139,7 +143,7 @@ function createAskRepayTransactionOnClick(method) {
     const requestData = generatePayload("ComponentConfig", "", "Global");
 
     // Make an HTTP POST request to the gateway
-    fetch('https://stokenet.radixdlt.com/state/entity/details', {
+    fetch(gwUrl+'/state/entity/details', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
@@ -194,15 +198,6 @@ function createAskRepayTransactionOnClick(method) {
   };
 }
 
-// class BondHolder {
-//   constructor(nonFungibleId, vaultAddresses, resourceAddress, address, holderAddress) {
-//     this.nonFungibleId = nonFungibleId;
-//     this.vaultAddresses = vaultAddresses;
-//     this.resourceAddress = resourceAddress;
-//     this.address = address;
-//     this.holderAddress = holderAddress;
-//   }
-// }
 
 function fetchDataAndNftId(selectedNfResource) {
   let nftHolders = [];
@@ -216,7 +211,7 @@ function fetchDataAndNftId(selectedNfResource) {
             .then((locationResponse) => {
               const vaultAddresses = locationResponse
                 .map((item) => item.owning_vault_address);
-                .filter((item): item is string => !!item);
+                // .filter((item): item is string => !!item);
 
               const locationMap = locationResponse.reduce((acc, item, index) => {
                 if (item.owning_vault_address) {
