@@ -1,4 +1,8 @@
 import { RadixDappToolkit, DataRequestBuilder, RadixNetwork, NonFungibleIdType, OneTimeDataRequestBuilder } from '@radixdlt/radix-dapp-toolkit'
+import { fetchMainPoolSize, fetchLendingPoolSize, fetchUserPosition, fetchComponentConfig } from './gateway.js'; // Adjust the path accordingly
+import { rdt } from './gateway'; // Adjust the path accordingly
+
+
 // You can create a dApp definition in the dev console at https://stokenet-console.radixdlt.com/dapp-metadata 
 // then use that account for your dAppId
 // Set an environment variable to indicate the current environment
@@ -21,13 +25,6 @@ gwUrl = import.meta.env.VITE_GATEWAY_URL;
 console.log("gw url (index.js): ", gwUrl)
 console.log("networkId (index.js): ", networkId)
 
-// Instantiate DappToolkit
-const rdt = RadixDappToolkit({
-  dAppDefinitionAddress: dAppId,
-  networkId: networkId,
-  applicationName: 'Lending dApp',
-  applicationVersion: '1.0.0',
-});
 console.log("dApp Toolkit: ", rdt)
 
 // Global states
@@ -40,32 +37,47 @@ let lnd_tokenAddress = import.meta.env.VITE_LND_TOKEN_ADDRESS // LND token resou
 
 let xrdAddress = import.meta.env.VITE_XRD //Stokenet XRD resource address
 
-console.log("componentAddress: ", componentAddress)
+console.log("componentAddress(index.js): ", componentAddress)
+console.log("rdt(index.js): ", rdt)
 
-let accountAddress
-let accountName
+// let accountAddress
+// let accountName
 
 // ************ Fetch the user's account address (Page Load) ************
-rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
-// Subscribe to updates to the user's shared wallet data
-rdt.walletApi.walletData$.subscribe((walletData) => {
-  console.log("subscription wallet data: ", walletData)
-  accountName = walletData.accounts[0].label
-  accountAddress = walletData.accounts[0].address
-  console.log("accountAddress: ", accountAddress)
-  document.getElementById('accountAddress').value = accountAddress
-  document.getElementById('accountAddressForRepay').value = accountAddress
-})
+// rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
+// // Subscribe to updates to the user's shared wallet data
+// rdt.walletApi.walletData$.subscribe((walletData) => {
+//   console.log("subscription wallet data(index.js): ", walletData)
+//   // accountName = walletData.accounts[0].label
+//   accountAddress = walletData.accounts[0].address
+//   console.log("accountAddress(index.js): ", accountAddress)
+//   document.getElementById('accountAddress').value = accountAddress
+//   document.getElementById('accountAddressForRepay').value = accountAddress
+// })
 
-
+// Additional function to execute on successful transaction
+function handleTransactionSuccess(result) {
+  // Your code here
+  console.log('Transaction successful');
+  // Call other functions or perform actions as needed
+  //fetch pool size
+  fetchMainPoolSize(componentAddress, xrdAddress);
+  fetchLendingPoolSize(componentAddress, xrdAddress);
+  //fetch nft metadata info of the connected user
+  fetchUserPosition(accountAddress);
+  //get config parameter of the component
+  fetchComponentConfig(componentAddress);
+}
 
 // ***** Main function *****
 function createTransactionOnClick(elementId, inputTextId, inputTextId2, method, errorField) {
   document.getElementById(elementId).onclick = async function () {
     let inputValue = document.getElementById(inputTextId).value;
     let inputValue2 = document.getElementById(inputTextId2).value;
+    let accountAddressFrom = document.getElementById('accountAddress').value;
     console.log(`got inputValue = `, inputValue);
     console.log(`got inputValue2 = `, inputValue2);
+    console.log(`accountAddress = `, accountAddressFrom);
 
     const manifest = generateManifest(method, inputValue, inputValue2);
     console.log(`${method} manifest`, manifest);
@@ -81,6 +93,7 @@ function createTransactionOnClick(elementId, inputTextId, inputTextId2, method, 
       document.getElementById(errorField).style.color = "red";
       throw result.error;
     }
+    handleTransactionSuccess(result);
 
     // await fetchUserPosition(accountAddress);
   };
@@ -112,11 +125,14 @@ function createTransactionOnButtonClick(elementId, method, errorField) {
 // ***** Utility function *****
 function generateManifest(method, inputValue, inputValue2) {
   let code;
+  let accAdd;
+  let accountAddressFrom = document.getElementById('accountAddress').value;
   switch (method) {
     case 'lend_tokens':
+      accAdd = inputValue2;
       code = `
         CALL_METHOD
-          Address("${accountAddress}")
+          Address("${accAdd}")
           "withdraw"    
           Address("${xrdAddress}")
           Decimal("${inputValue}");
@@ -124,7 +140,7 @@ function generateManifest(method, inputValue, inputValue2) {
           Address("${xrdAddress}")
           Bucket("xrd");
         CALL_METHOD
-          Address("${accountAddress}")
+          Address("${accAdd}")
           "withdraw"    
           Address("${lnd_resourceAddress}")
           Decimal("1");
@@ -137,7 +153,7 @@ function generateManifest(method, inputValue, inputValue2) {
           Bucket("xrd")
           Bucket("nft");
         CALL_METHOD
-          Address("${accountAddress}")
+          Address("${accAdd}")
           "deposit_batch"
           Expression("ENTIRE_WORKTOP");
           `;
@@ -174,9 +190,10 @@ function generateManifest(method, inputValue, inputValue2) {
       `;
       break;      
     case 'takes_back':
+      accAdd = inputValue2;
       code = `
         CALL_METHOD
-          Address("${accountAddress}")
+          Address("${accAdd}")
           "withdraw"    
           Address("${lnd_tokenAddress}")
           Decimal("${inputValue}");
@@ -185,7 +202,7 @@ function generateManifest(method, inputValue, inputValue2) {
           Decimal("${inputValue}")
           Bucket("loan");
         CALL_METHOD
-          Address("${accountAddress}")
+          Address("${accAdd}")
           "withdraw"    
           Address("${lnd_resourceAddress}")
           Decimal("1");
@@ -199,7 +216,7 @@ function generateManifest(method, inputValue, inputValue2) {
           Bucket("loan")
           Bucket("nft");
         CALL_METHOD
-          Address("${accountAddress}")
+          Address("${accAdd}")
           "deposit_batch"
           Expression("ENTIRE_WORKTOP");
           `;
@@ -281,9 +298,11 @@ function generateManifest(method, inputValue, inputValue2) {
             `;
         break;           
         case 'borrow':
+          accAdd = accountAddressFrom;
+          //I am getting the accountAddress from the method's signature
           code = `
           CALL_METHOD
-            Address("${accountAddress}")
+            Address("${accAdd}")
             "withdraw"    
             Address("${lnd_resourceAddress}")
             Decimal("1");
@@ -296,18 +315,20 @@ function generateManifest(method, inputValue, inputValue2) {
             "borrow"
             Decimal("${inputValue}")
             Bucket("nft")
-            "${accountAddress}"
+            "${accAdd}"
             Decimal("${inputValue2}");
           CALL_METHOD
-            Address("${accountAddress}")
+            Address("${accAdd}")
             "deposit_batch"
             Expression("ENTIRE_WORKTOP");
             `;
         break;   
         case 'repay':
+          accAdd = inputValue2;
+          //I am getting the accountAddress from the method's signature
           code = `
           CALL_METHOD
-            Address("${accountAddress}")
+            Address("${accAdd}")
             "withdraw"    
             Address("${lnd_resourceAddress}")
             Decimal("1");
@@ -316,7 +337,7 @@ function generateManifest(method, inputValue, inputValue2) {
             Decimal("1")
             Bucket("nft");  
           CALL_METHOD
-            Address("${accountAddress}")
+            Address("${accAdd}")
             "withdraw"    
             Address("${xrdAddress}")
             Decimal("${inputValue}");
@@ -329,9 +350,9 @@ function generateManifest(method, inputValue, inputValue2) {
             "repay"
             Bucket("repay")
             Bucket("nft")
-            "${accountAddress}";
+            "${accAdd}";
           CALL_METHOD
-            Address("${accountAddress}")
+            Address("${accAdd}")
             "deposit_batch"
             Expression("ENTIRE_WORKTOP");
             `;

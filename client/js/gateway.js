@@ -26,8 +26,20 @@ const rdt = RadixDappToolkit({
   networkId: networkId,
   applicationName: 'Lending dApp',
   applicationVersion: '1.0.0',
+},
+{
+  networkId: 12,
+  onDisconnect: () => {
+    // clear your application state
+    localStorage.removeItem('accountAddress')
+    console.log("removeItem accountAddress")
+  },
+  onInit: ({ accounts }) => {
+    // set your initial application state
+  },
 });
 console.log("dApp Toolkit: ", rdt)
+export { rdt };
 
 // Global states
 let componentAddress = import.meta.env.VITE_COMP_ADDRESS //LendingDApp component address on stokenet
@@ -39,17 +51,17 @@ let lnd_tokenAddress = import.meta.env.VITE_LND_TOKEN_ADDRESS // LND token resou
 
 let xrdAddress = import.meta.env.VITE_XRD //Stokenet XRD resource address
 
-let accountAddress
-let accountName
+let accountAddress;
 
-// ************ Fetch the user's account address (Page Load) ************
-rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
-// Subscribe to updates to the user's shared wallet data
-rdt.walletApi.walletData$.subscribe((walletData) => {
-  console.log("subscription wallet data: ", walletData)
-  accountName = walletData.accounts[0].label
-  accountAddress = walletData.accounts[0].address
+// Check if accountAddress is stored in localStorage
+const storedAccountAddress = localStorage.getItem('accountAddress');
 
+if (storedAccountAddress) {
+  // If stored, update the variable and any relevant UI elements
+  accountAddress = storedAccountAddress;
+  document.getElementById('accountAddress').value = accountAddress;
+
+  //fill smart contract and account positions 
   //fetch pool size
   fetchMainPoolSize(componentAddress, xrdAddress);
   fetchLendingPoolSize(componentAddress, xrdAddress);
@@ -57,16 +69,57 @@ rdt.walletApi.walletData$.subscribe((walletData) => {
   fetchUserPosition(accountAddress);
   //get config parameter of the component
   fetchComponentConfig(componentAddress);
-})
+
+  //TODO this does not work
+  //this trigger a request to the wallet to know the account (it returns data if the user is logger)
+  // rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1));
+  // const walletRequest = rdt.walletApi.sendRequest();
+  // // Subscribe to updates to the user's shared wallet data
+  // rdt.walletApi.walletData$.subscribe((walletData) => {
+  //   console.log("is it logged yet ?: ", walletData);
+  //   if (walletData.accounts.length == 0) {
+  //     // inital state or user has logged out
+  //     console.log("user is logged out so I need to clean data state of the dApp")
+  //     localStorage.removeItem('accountAddress')
+  //   } 
+  // });
+
+} else {
+
+  // ************ Fetch the user's account address (Page Load) ************
+  rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
+  //rdt.walletApi.sendRequest();
+  // Subscribe to updates to the user's shared wallet data
+  rdt.walletApi.walletData$.subscribe((walletData) => {
+    console.log("subscription wallet data: ", walletData)
+    // accountName = walletData.accounts[0].label
+    accountAddress = walletData.accounts[0].address
+    document.getElementById('accountAddress').value = accountAddress
+
+    // Store the accountAddress in localStorage
+    localStorage.setItem('accountAddress', accountAddress);
+
+    //fill smart contract and account positions 
+    //fetch pool size
+    fetchMainPoolSize(componentAddress, xrdAddress);
+    fetchLendingPoolSize(componentAddress, xrdAddress);
+    //fetch nft metadata info of the connected user
+    fetchUserPosition(accountAddress);
+    //get config parameter of the component
+    fetchComponentConfig(componentAddress);
+  })
+}  
+
+
 
 
 // *********** Fetch Component Config (/state/entity/details) (Gateway) ***********
-async function fetchComponentConfig(componentAddress) {
+export async function fetchComponentConfig(componentAddress) {
   // Define the data to be sent in the POST request.
   const requestData = generatePayload("ComponentConfig", "", "Global");
 
   // Make an HTTP POST request to the gateway
-  fetch('https://stokenet.radixdlt.com/state/entity/details', {
+  fetch(gwUrl+'/state/entity/details', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
@@ -212,7 +265,7 @@ function getOpenBorrowing(data) {
         .flatMap(item => item) // Flatten the array of arrays
         .map(innerItem => innerItem.value);
 
-      console.log("elementsFieldsArray:", elementsFieldsArray);
+      // console.log("elementsFieldsArray:", elementsFieldsArray);
 
       // Return the extracted values
       return elementsFieldsArray;
@@ -296,7 +349,7 @@ function generatePayload(method, address, type) {
 
 
 // *********** Fetch User NFT Metadata Information (/entity/details) (Gateway) ***********
-async function fetchUserPosition(accountAddress) {
+export async function fetchUserPosition(accountAddress) {
   // Define the data to be sent in the POST request.
   const requestData = generatePayload("UserPosition", "", "Vault");
 
@@ -312,7 +365,7 @@ async function fetchUserPosition(accountAddress) {
   .then(data => { 
       const resourceAddress = `${lnd_resourceAddress}`;
       const result = getVaultsByResourceAddress(data, resourceAddress);
-      console.log(" NFT id " + JSON.stringify(result));
+      // console.log(" NFT id " + JSON.stringify(result));
       const itemsArray = result[0].items
 
       // Loop through itemsArray and make GET requests for each item
@@ -356,7 +409,7 @@ function getVaultsByResourceAddress(jsonData, resourceAddress) {
       );
       
       matchingResources.forEach(resource => {
-        console.log(" matchingResources " + JSON.stringify(resource));
+        // console.log(" matchingResources " + JSON.stringify(resource));
         if (resource.vaults && resource.vaults.total_count > 0) {
           result.push(...resource.vaults.items);
         }
@@ -437,14 +490,14 @@ async function fetchNftMetadata(resourceAddress, item) {
 
 
 // *********** Fetch Main Pool size (Gateway) ***********
-async function fetchMainPoolSize(component, xrdAddress) {
+export async function fetchMainPoolSize(component, xrdAddress) {
   // Define the data to be sent in the POST request.
-  console.log('Request data for Main Pool size for component = ', `${component}`)
+  // console.log('Request data for Main Pool size for component = ', `${component}`)
   const requestData = `{
       "address": "${component}",
       "resource_address": "${xrdAddress}"
   }`;
-  console.log('Request data for Main Pool size', requestData)
+  // console.log('Request data for Main Pool size', requestData)
 
   // Make an HTTP POST request to the gateway
   fetch('https://stokenet.radixdlt.com/state/entity/page/fungible-vaults/', {
@@ -470,7 +523,7 @@ async function fetchMainPoolSize(component, xrdAddress) {
 }
 
 // *********** Fetch Lendings Pool size (Gateway) ***********
-async function fetchLendingPoolSize(component, xrdAddress) {
+export async function fetchLendingPoolSize(component, xrdAddress) {
   // Define the data to be sent in the POST request.
   const requestData = `{
     address: "${component}",
