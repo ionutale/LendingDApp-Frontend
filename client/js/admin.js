@@ -43,20 +43,38 @@ let lnd_badPayerResourceAddress = import.meta.env.VITE_BAD_PAYER_RESOURCE_ADDRES
 let xrdAddress = import.meta.env.VITE_XRD //Stokenet XRD resource address
 
 let accountAddress
-let accountName
+// let accountName
 let inputValue
 let openBorrowing
 
 // ************ Fetch the user's account address ************
-rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
-// Subscribe to updates to the user's shared wallet data
-rdt.walletApi.walletData$.subscribe((walletData) => {
-  console.log("subscription wallet data: ", walletData)
-  // document.getElementById('accountName').innerText = walletData.accounts[0].label
-  // document.getElementById('accountAddress').innerText = walletData.accounts[0].address
-  accountName = walletData.accounts[0].label
-  accountAddress = walletData.accounts[0].address
-})
+// rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
+// // Subscribe to updates to the user's shared wallet data
+// rdt.walletApi.walletData$.subscribe((walletData) => {
+//   console.log("subscription wallet data: ", walletData)
+//   accountAddress = walletData.accounts[0].address
+// })
+
+
+// ************ Fetch the user's account address (Page Load) ************
+// Check if accountAddress is stored in localStorage
+const storedAccountAddress = localStorage.getItem('accountAddress');
+if (storedAccountAddress) {
+  // If stored, update the variable and any relevant UI elements
+  accountAddress = storedAccountAddress;
+  // document.getElementById('accountAddress').value = accountAddress;
+} else {
+  rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
+  //rdt.walletApi.sendRequest();
+  // Subscribe to updates to the user's shared wallet data
+  rdt.walletApi.walletData$.subscribe((walletData) => {
+    console.log("subscription wallet data: ", walletData)
+    accountAddress = walletData.accounts[0].address
+    document.getElementById('accountAddress').value = accountAddress
+    // Store the accountAddress in localStorage
+    localStorage.setItem('accountAddress', accountAddress);
+  })
+}  
 
 
 // ************ Utility Function (Gateway) *****************

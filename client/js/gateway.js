@@ -61,6 +61,21 @@ if (storedAccountAddress) {
   accountAddress = storedAccountAddress;
   document.getElementById('accountAddress').value = accountAddress;
 
+  //TODO controllò però se l'address è cambiato !!
+          // rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
+          // rdt.walletApi.walletData$.subscribe((walletData) => {
+          //   console.log("subscription wallet data: ", walletData)
+          //   accountAddress = walletData && walletData.accounts && walletData.accounts.length>0 ? walletData.accounts[0].address : "none"
+          //   document.getElementById('accountAddress').value = accountAddress
+          //   console.log("is the same wallet: ", accountAddress)
+          //   // Store the accountAddress in localStorage
+          //   if (localStorage.getItem('accountAddress') != accountAddress) {
+          //     console.log("change the account on the dApp and set the following: ", accountAddress)
+          //     localStorage.setItem('accountAddress', accountAddress);
+          //   }
+          //   // 
+          // })
+
   //fill smart contract and account positions 
   //fetch pool size
   fetchMainPoolSize(componentAddress, xrdAddress);
@@ -354,7 +369,7 @@ export async function fetchUserPosition(accountAddress) {
   const requestData = generatePayload("UserPosition", "", "Vault");
 
   // Make an HTTP POST request to the gateway
-  fetch('https://stokenet.radixdlt.com/state/entity/details', {
+  fetch(gwUrl+'/state/entity/details', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
@@ -366,6 +381,7 @@ export async function fetchUserPosition(accountAddress) {
       const resourceAddress = `${lnd_resourceAddress}`;
       const result = getVaultsByResourceAddress(data, resourceAddress);
       // console.log(" NFT id " + JSON.stringify(result));
+      //TODO controllare la presenza di items
       const itemsArray = result[0].items
 
       // Loop through itemsArray and make GET requests for each item
@@ -432,7 +448,7 @@ async function fetchNftMetadata(resourceAddress, item) {
   }`;
 
   // Make an HTTP POST request to the gateway
-  fetch('https://stokenet.radixdlt.com/state/non-fungible/data', {
+  fetch(gwUrl+'/state/non-fungible/data', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
@@ -500,7 +516,7 @@ export async function fetchMainPoolSize(component, xrdAddress) {
   // console.log('Request data for Main Pool size', requestData)
 
   // Make an HTTP POST request to the gateway
-  fetch('https://stokenet.radixdlt.com/state/entity/page/fungible-vaults/', {
+  fetch(gwUrl+'/state/entity/page/fungible-vaults/', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
@@ -531,7 +547,7 @@ export async function fetchLendingPoolSize(component, xrdAddress) {
 }`;
 
   // Make an HTTP POST request to the gateway
-  fetch('https://stokenet.radixdlt.com/state/entity/page/fungible-vaults/', {
+  fetch(gwUrl+'/state/entity/page/fungible-vaults/', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',

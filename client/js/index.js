@@ -159,32 +159,53 @@ function generateManifest(method, inputValue, inputValue2) {
           `;
       break;
     case 'register':
-      code = ` 
+        code = ` 
+          CALL_METHOD
+            Address("${componentAddress}")
+            "register";
+          CALL_METHOD
+            Address("${accountAddressFrom}")
+            "deposit_batch"
+            Expression("ENTIRE_WORKTOP");
+        `;
+        break;      
+    // case 'register':
+    //   code = ` 
+    //     CALL_METHOD
+    //       Address("${accountAddressFrom}")
+    //       "withdraw"    
+    //       Address("${lnd_resourceAddress}")
+    //       Decimal("1");
+    //     TAKE_ALL_FROM_WORKTOP
+    //       Address("${lnd_resourceAddress}")
+    //       Bucket("nft");    
+    //     CALL_METHOD
+    //       Address("${componentAddress}")
+    //       "register"
+    //       Bucket("nft");
+    //     CALL_METHOD
+    //       Address("${accountAddressFrom}")
+    //       "deposit_batch"
+    //       Expression("ENTIRE_WORKTOP");
+    //   `;
+    //   break;
+    case 'unregister':
+      code = `
         CALL_METHOD
-          Address("${accountAddress}")
+          Address("${accountAddressFrom}")
           "withdraw"    
           Address("${lnd_resourceAddress}")
           Decimal("1");
-        TAKE_ALL_FROM_WORKTOP
+        TAKE_FROM_WORKTOP
           Address("${lnd_resourceAddress}")
-          Bucket("nft");    
+          Decimal("1")
+          Bucket("nft");      
         CALL_METHOD
           Address("${componentAddress}")
-          "register"
+          "unregister"
           Bucket("nft");
         CALL_METHOD
-          Address("${accountAddress}")
-          "deposit_batch"
-          Expression("ENTIRE_WORKTOP");
-      `;
-      break;
-    case 'unregister':
-      code = ` 
-        CALL_METHOD
-          Address("${componentAddress}")
-          "unregister";
-        CALL_METHOD
-          Address("${accountAddress}")
+          Address("${accountAddressFrom}")
           "deposit_batch"
           Expression("ENTIRE_WORKTOP");
       `;
@@ -360,7 +381,7 @@ function generateManifest(method, inputValue, inputValue2) {
         case 'fund':
           code = `
           CALL_METHOD
-            Address("${accountAddress}")
+            Address("${accountAddressFrom}")
             "withdraw"    
             Address("${xrdAddress}")
             Decimal("${inputValue}");
@@ -372,7 +393,7 @@ function generateManifest(method, inputValue, inputValue2) {
             "fund"
             Bucket("xrd");
           CALL_METHOD
-            Address("${accountAddress}")
+            Address("${accountAddressFrom}")
             "deposit_batch"
             Expression("ENTIRE_WORKTOP");
             `;
@@ -389,7 +410,7 @@ function generateManifest(method, inputValue, inputValue2) {
 // Usage
 // createTransactionOnClick (elementId = divId del button, inputTextId = divId del field di inserimento, method = scrypto method)
 createTransactionOnButtonClick('register', 'register', 'registerTxResult');
-// createTransactionOnButtonClick('unregister', 'unregister', 'unregisterTxResult');
+createTransactionOnButtonClick('unregister', 'unregister', 'unregisterTxResult');
 createTransactionOnClick('lendTokens', 'numberOfTokens', 'accountAddress', 'lend_tokens', 'lendTxResult');
 createTransactionOnClick('takes_back', 'numberOfLndTokens', 'accountAddress', 'takes_back', 'takeBackTxResult');
 
