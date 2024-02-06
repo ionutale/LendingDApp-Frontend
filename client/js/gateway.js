@@ -21,25 +21,23 @@ console.log("gw url (gateway.js): ", gwUrl)
 console.log("networkId (gateway.js): ", networkId)
 
 // Instantiate DappToolkit
-const rdt = RadixDappToolkit({
+export const rdt = RadixDappToolkit({
   dAppDefinitionAddress: dAppId,
   networkId: networkId,
   applicationName: 'Lending dApp',
-  applicationVersion: '1.0.0',
-},
-{
-  networkId: 12,
-  onDisconnect: () => {
+  applicationVersion: '1.0.0'
+  ,onDisconnect: () => {
     // clear your application state
     localStorage.removeItem('accountAddress')
     console.log("removeItem accountAddress")
-  },
-  onInit: ({ accounts }) => {
-    // set your initial application state
-  },
+    cleanUserPosition();
+  }
+  // ,onInit: () => {
+  //   console.log("onInit")
+  // }
 });
-console.log("dApp Toolkit: ", rdt)
-export { rdt };
+// console.log("dApp Toolkit: ", rdt)
+// export { rdt };
 
 // Global states
 let componentAddress = import.meta.env.VITE_COMP_ADDRESS //LendingDApp component address on stokenet
@@ -53,77 +51,33 @@ let xrdAddress = import.meta.env.VITE_XRD //Stokenet XRD resource address
 
 let accountAddress;
 
-// Check if accountAddress is stored in localStorage
-const storedAccountAddress = localStorage.getItem('accountAddress');
-
-if (storedAccountAddress) {
-  // If stored, update the variable and any relevant UI elements
-  accountAddress = storedAccountAddress;
-  document.getElementById('accountAddress').value = accountAddress;
-
-  //TODO controllò però se l'address è cambiato !!
-          // rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
-          // rdt.walletApi.walletData$.subscribe((walletData) => {
-          //   console.log("subscription wallet data: ", walletData)
-          //   accountAddress = walletData && walletData.accounts && walletData.accounts.length>0 ? walletData.accounts[0].address : "none"
-          //   document.getElementById('accountAddress').value = accountAddress
-          //   console.log("is the same wallet: ", accountAddress)
-          //   // Store the accountAddress in localStorage
-          //   if (localStorage.getItem('accountAddress') != accountAddress) {
-          //     console.log("change the account on the dApp and set the following: ", accountAddress)
-          //     localStorage.setItem('accountAddress', accountAddress);
-          //   }
-          //   // 
-          // })
-
-  //fill smart contract and account positions 
-  //fetch pool size
-  fetchMainPoolSize(componentAddress, xrdAddress);
-  fetchLendingPoolSize(componentAddress, xrdAddress);
-  //fetch nft metadata info of the connected user
-  fetchUserPosition(accountAddress);
-  //get config parameter of the component
-  fetchComponentConfig(componentAddress);
-
-  //TODO this does not work
-  //this trigger a request to the wallet to know the account (it returns data if the user is logger)
-  // rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1));
-  // const walletRequest = rdt.walletApi.sendRequest();
-  // // Subscribe to updates to the user's shared wallet data
-  // rdt.walletApi.walletData$.subscribe((walletData) => {
-  //   console.log("is it logged yet ?: ", walletData);
-  //   if (walletData.accounts.length == 0) {
-  //     // inital state or user has logged out
-  //     console.log("user is logged out so I need to clean data state of the dApp")
-  //     localStorage.removeItem('accountAddress')
-  //   } 
-  // });
-
-} else {
-
   // ************ Fetch the user's account address (Page Load) ************
   rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
-  //rdt.walletApi.sendRequest();
+  // rdt.walletApi.sendRequest();
   // Subscribe to updates to the user's shared wallet data
-  rdt.walletApi.walletData$.subscribe((walletData) => {
+  const subscription = rdt.walletApi.walletData$.subscribe((walletData) => {
     console.log("subscription wallet data: ", walletData)
-    // accountName = walletData.accounts[0].label
-    accountAddress = walletData.accounts[0].address
-    document.getElementById('accountAddress').value = accountAddress
+    accountAddress = walletData && walletData.accounts && walletData.accounts.length>0 ? walletData.accounts[0].address : null
+    console.log("accountAddress : ", accountAddress)
+    if (accountAddress!=null) {
+      console.log("accountAddress(gateway.js) : ", accountAddress)
+      document.getElementById('accountAddress').value = accountAddress
 
-    // Store the accountAddress in localStorage
-    localStorage.setItem('accountAddress', accountAddress);
+      // Store the accountAddress in localStorage
+      localStorage.setItem('accountAddress', accountAddress);
 
-    //fill smart contract and account positions 
-    //fetch pool size
-    fetchMainPoolSize(componentAddress, xrdAddress);
-    fetchLendingPoolSize(componentAddress, xrdAddress);
-    //fetch nft metadata info of the connected user
-    fetchUserPosition(accountAddress);
-    //get config parameter of the component
-    fetchComponentConfig(componentAddress);
+      //fill smart contract and account positions 
+      //fetch pool size
+      fetchMainPoolSize(componentAddress, xrdAddress);
+      fetchLendingPoolSize(componentAddress, xrdAddress);
+      //fetch nft metadata info of the connected user
+      fetchUserPosition(accountAddress);
+      //get config parameter of the component
+      fetchComponentConfig(componentAddress);
+    }
   })
-}  
+  // subscription.unsubscribe();
+
 
 
 
@@ -186,7 +140,7 @@ export async function fetchComponentConfig(componentAddress) {
 //for showing current borrowings
 function updateBorrowersLinks(openBorrowingArray) {
   const borrowersLinksContainer = document.getElementById('borrowers-links-container');
-  console.log('Container:', borrowersLinksContainer);
+  // console.log('Container:', borrowersLinksContainer);
 
   // Clear existing content in the container
   borrowersLinksContainer.innerHTML = '';
@@ -271,7 +225,7 @@ function getOpenBorrowing(data) {
       return element.fields;
     });
 
-    console.log("rootFields:", rootFields);
+    // console.log("rootFields:", rootFields);
 
     // Check if the "rootFields" array is not empty
     if (rootFields.length > 0) {
@@ -380,12 +334,12 @@ export async function fetchUserPosition(accountAddress) {
   .then(data => { 
       const resourceAddress = `${lnd_resourceAddress}`;
       const result = getVaultsByResourceAddress(data, resourceAddress);
-      // console.log(" NFT id " + JSON.stringify(result));
+      console.log(" NFT id " + JSON.stringify(result));
       //TODO controllare la presenza di items
-      const itemsArray = result[0].items
-
+      const itemsArray = result && result.length>0 ? result[0].items : null
+      console.log(" itemsArray " + itemsArray);
       // Loop through itemsArray and make GET requests for each item
-      itemsArray.forEach(async (item) => {
+      itemsArray?.forEach(async (item) => {
         await fetchNftMetadata(resourceAddress, item);
       });
   })
@@ -501,6 +455,20 @@ async function fetchNftMetadata(resourceAddress, item) {
   .catch(error => {
       console.error('Error fetching data:', error);
   });
+}
+
+// *********** cleanUserPosition (Gateway) ***********
+async function cleanUserPosition() {
+    const amountLiquidityFundedDiv = document.getElementById("amountLiquidityFunded").textContent = "";
+    const epochLiquidityFundedDiv = document.getElementById("epochLiquidityFunded").textContent = "";
+    const epochLiquidityReedemedDiv = document.getElementById("epochLiquidityReedemed").textContent = "";
+    
+    const amountBorrowingsDiv = document.getElementById("amountBorrowings").textContent = "";
+    const epochBorrowDiv = document.getElementById("epochBorrow").textContent = "";
+    const expectedEpochBorrowDiv = document.getElementById("expectedEpochBorrow").textContent = "";
+    const epochRepayDiv = document.getElementById("epochRepay").textContent = "";
+
+    const numberOfTokensInput = document.getElementById("numberOfTokens").textContent = "";
 }
 
 

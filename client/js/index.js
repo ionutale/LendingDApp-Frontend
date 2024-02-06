@@ -25,7 +25,7 @@ gwUrl = import.meta.env.VITE_GATEWAY_URL;
 console.log("gw url (index.js): ", gwUrl)
 console.log("networkId (index.js): ", networkId)
 
-console.log("dApp Toolkit: ", rdt)
+// console.log("dApp Toolkit: ", rdt)
 
 // Global states
 let componentAddress = import.meta.env.VITE_COMP_ADDRESS //LendingDApp component address on stokenet
@@ -38,22 +38,7 @@ let lnd_tokenAddress = import.meta.env.VITE_LND_TOKEN_ADDRESS // LND token resou
 let xrdAddress = import.meta.env.VITE_XRD //Stokenet XRD resource address
 
 console.log("componentAddress(index.js): ", componentAddress)
-console.log("rdt(index.js): ", rdt)
-
-// let accountAddress
-// let accountName
-
-// ************ Fetch the user's account address (Page Load) ************
-// rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
-// // Subscribe to updates to the user's shared wallet data
-// rdt.walletApi.walletData$.subscribe((walletData) => {
-//   console.log("subscription wallet data(index.js): ", walletData)
-//   // accountName = walletData.accounts[0].label
-//   accountAddress = walletData.accounts[0].address
-//   console.log("accountAddress(index.js): ", accountAddress)
-//   document.getElementById('accountAddress').value = accountAddress
-//   document.getElementById('accountAddressForRepay').value = accountAddress
-// })
+// console.log("rdt(index.js): ", rdt)
 
 // Additional function to execute on successful transaction
 function handleTransactionSuccess(result) {

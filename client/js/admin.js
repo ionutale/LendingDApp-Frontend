@@ -58,11 +58,11 @@ let openBorrowing
 
 // ************ Fetch the user's account address (Page Load) ************
 // Check if accountAddress is stored in localStorage
-const storedAccountAddress = localStorage.getItem('accountAddress');
+const storedAccountAddress = localStorage.getItem('adminAccountAddress');
 if (storedAccountAddress) {
   // If stored, update the variable and any relevant UI elements
   accountAddress = storedAccountAddress;
-  // document.getElementById('accountAddress').value = accountAddress;
+  // document.getElementById('adminAccountAddress').value = accountAddress;
 } else {
   rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
   //rdt.walletApi.sendRequest();
@@ -72,7 +72,7 @@ if (storedAccountAddress) {
     accountAddress = walletData.accounts[0].address
     document.getElementById('accountAddress').value = accountAddress
     // Store the accountAddress in localStorage
-    localStorage.setItem('accountAddress', accountAddress);
+    localStorage.setItem('adminAccountAddress', accountAddress);
   })
 }  
 
@@ -135,7 +135,7 @@ function getLateBorrowers(data) {
       // Assuming each element has "fields" property
       return element;
     });
-    console.log("rootFields:", rootFields);
+    // console.log("rootFields:", rootFields);
 
     // Check if the "rootFields" array is not empty
     if (rootFields.length > 0) {
