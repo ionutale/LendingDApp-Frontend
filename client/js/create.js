@@ -1,7 +1,5 @@
 import { RadixDappToolkit, DataRequestBuilder, RadixNetwork } from '@radixdlt/radix-dapp-toolkit'
-// You can create a dApp definition in the dev console at https://stokenet-console.radixdlt.com/dapp-metadata 
-// then use that account for your dAppId
-// Set an environment variable to indicate the current environment
+
 const environment = process.env.NODE_ENV || 'Stokenet'; // Default to 'development' if NODE_ENV is not set
 console.log("environment : ", environment)
 // Define constants based on the environment
@@ -34,15 +32,12 @@ rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
 // Subscribe to updates to the user's shared wallet data
 rdt.walletApi.walletData$.subscribe((walletData) => {
   console.log("subscription wallet data: ", walletData)
-  // document.getElementById('accountName').innerText = walletData.accounts[0].label
-  // document.getElementById('accountAddress').innerText = walletData.accounts[0].address
   accountName = walletData.accounts[0].label
   accountAddress = walletData.accounts[0].address
 })
 
 // Global states
 let componentAddress = import.meta.env.VITE_COMP_ADDRESS //LendingDApp component address on stokenet
-// You receive this badge(your resource address will be different) when you instantiate the component
 let admin_badge = import.meta.env.VITE_ADMIN_BADGE
 let owner_badge = import.meta.env.VITE_OWNER_BADGE
 let staff_badge = import.meta.env.VITE_STAFF_BADGE_ADDRESS

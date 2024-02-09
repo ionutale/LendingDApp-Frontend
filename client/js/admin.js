@@ -1,6 +1,7 @@
 import { RadixDappToolkit, DataRequestBuilder, RadixNetwork } from '@radixdlt/radix-dapp-toolkit'
 // You can create a dApp definition in the dev console at https://stokenet-console.radixdlt.com/dapp-metadata 
 // then use that account for your dAppId
+
 // Set an environment variable to indicate the current environment
 const environment = process.env.NODE_ENV || 'Stokenet'; // Default to 'development' if NODE_ENV is not set
 console.log("environment (admin.js): ", environment)
@@ -18,7 +19,6 @@ if (environment === 'production') {
   gwUrl = import.meta.env.VITE_GATEWAY_URL;
 }
 console.log("gw url (admin.js): ", gwUrl)
-console.log("networkId (admin.js): ", networkId)
 
 // Instantiate DappToolkit
 const rdt = RadixDappToolkit({
@@ -43,18 +43,8 @@ let lnd_badPayerResourceAddress = import.meta.env.VITE_BAD_PAYER_RESOURCE_ADDRES
 let xrdAddress = import.meta.env.VITE_XRD //Stokenet XRD resource address
 
 let accountAddress
-// let accountName
 let inputValue
 let openBorrowing
-
-// ************ Fetch the user's account address ************
-// rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
-// // Subscribe to updates to the user's shared wallet data
-// rdt.walletApi.walletData$.subscribe((walletData) => {
-//   console.log("subscription wallet data: ", walletData)
-//   accountAddress = walletData.accounts[0].address
-// })
-
 
 // ************ Fetch the user's account address (Page Load) ************
 // Check if accountAddress is stored in localStorage
@@ -65,10 +55,9 @@ if (storedAccountAddress) {
   // document.getElementById('adminAccountAddress').value = accountAddress;
 } else {
   rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
-  //rdt.walletApi.sendRequest();
   // Subscribe to updates to the user's shared wallet data
   rdt.walletApi.walletData$.subscribe((walletData) => {
-    console.log("subscription wallet data: ", walletData)
+    // console.log("subscription wallet data: ", walletData)
     accountAddress = walletData.accounts[0].address
     document.getElementById('accountAddress').value = accountAddress
     // Store the accountAddress in localStorage
@@ -135,7 +124,6 @@ function getLateBorrowers(data) {
       // Assuming each element has "fields" property
       return element;
     });
-    // console.log("rootFields:", rootFields);
 
     // Check if the "rootFields" array is not empty
     if (rootFields.length > 0) {
@@ -173,7 +161,6 @@ function createAskRepayTransactionOnClick(method) {
       const json = data.items ? data.items[0] : null;
       //get open borrowing
       const openBorrowing = getLateBorrowers(json);
-      console.log("[admin] fetch openBorrowing:", openBorrowing.length);
       let amount = openBorrowing.length;
       let depositToRecipients = openBorrowing
         .map((recipientAddress, index) => `
@@ -347,7 +334,6 @@ function createReleaseLateBorrowersTransactionOnClick(method) {
 function createTransactionOnClick(elementId, inputTextId, method) {
   document.getElementById(elementId).onclick = async function () {
     let inputValue = document.getElementById(inputTextId).value;
-    console.log(`got inputValue = `, inputValue);
     const manifest = generateManifest(method, inputValue);
     console.log(`${method} manifest`, manifest);
     const result = await rdt.walletApi.sendTransaction({
@@ -508,7 +494,6 @@ function generateManifest(method, inputValue) {
             Expression("ENTIRE_WORKTOP");
             `;
         break;           
-    // Add more cases as needed
     default:
       throw new Error(`Unsupported method: ${method}`);
   }

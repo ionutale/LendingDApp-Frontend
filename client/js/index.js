@@ -1,11 +1,7 @@
 import { RadixDappToolkit, DataRequestBuilder, RadixNetwork, NonFungibleIdType, OneTimeDataRequestBuilder } from '@radixdlt/radix-dapp-toolkit'
-import { fetchMainPoolSize, fetchLendingPoolSize, fetchUserPosition, fetchComponentConfig } from './gateway.js'; // Adjust the path accordingly
-import { rdt } from './gateway'; // Adjust the path accordingly
+import { fetchMainPoolSize, fetchLendingPoolSize, fetchUserPosition, fetchComponentConfig } from './gateway.js'; 
+import { rdt } from './gateway'; 
 
-
-// You can create a dApp definition in the dev console at https://stokenet-console.radixdlt.com/dapp-metadata 
-// then use that account for your dAppId
-// Set an environment variable to indicate the current environment
 const environment = process.env.NODE_ENV || 'Stokenet'; // Default to 'development' if NODE_ENV is not set
 console.log("environment (index.js): ", environment)
 
@@ -18,18 +14,13 @@ if (environment == 'production') {
 } else {
   // Default to Stokenet configuration
   dAppId = import.meta.env.VITE_DAPP_ID
-  //  'account_tdx_2_12870m7gklv3p90004zjnm39jrhpf2vseejrgpncptl7rhsagz8yjm9';
   networkId = RadixNetwork.Stokenet;
 }
 gwUrl = import.meta.env.VITE_GATEWAY_URL;
 console.log("gw url (index.js): ", gwUrl)
-console.log("networkId (index.js): ", networkId)
-
-// console.log("dApp Toolkit: ", rdt)
 
 // Global states
 let componentAddress = import.meta.env.VITE_COMP_ADDRESS //LendingDApp component address on stokenet
-// You receive this badge(your resource address will be different) when you instantiate the component
 let admin_badge = import.meta.env.VITE_ADMIN_BADGE
 let owner_badge = import.meta.env.VITE_OWNER_BADGE
 let lnd_resourceAddress = import.meta.env.VITE_LND_RESOURCE_ADDRESS // XRD lender badge manager
@@ -37,14 +28,7 @@ let lnd_tokenAddress = import.meta.env.VITE_LND_TOKEN_ADDRESS // LND token resou
 
 let xrdAddress = import.meta.env.VITE_XRD //Stokenet XRD resource address
 
-console.log("componentAddress(index.js): ", componentAddress)
-// console.log("rdt(index.js): ", rdt)
-
-// Additional function to execute on successful transaction
 function handleTransactionSuccess(result) {
-  // Your code here
-  console.log('Transaction successful');
-  // Call other functions or perform actions as needed
   //fetch pool size
   fetchMainPoolSize(componentAddress, xrdAddress);
   fetchLendingPoolSize(componentAddress, xrdAddress);
@@ -60,9 +44,6 @@ function createTransactionOnClick(elementId, inputTextId, inputTextId2, method, 
     let inputValue = document.getElementById(inputTextId).value;
     let inputValue2 = document.getElementById(inputTextId2).value;
     let accountAddressFrom = document.getElementById('accountAddress').value;
-    console.log(`got inputValue = `, inputValue);
-    console.log(`got inputValue2 = `, inputValue2);
-    console.log(`accountAddress = `, accountAddressFrom);
 
     const manifest = generateManifest(method, inputValue, inputValue2);
     console.log(`${method} manifest`, manifest);
@@ -72,14 +53,11 @@ function createTransactionOnClick(elementId, inputTextId, inputTextId2, method, 
       version: 1,
     });
     if (result.isErr()) {
-      console.log(`${method} User Error: `, result.error);
       document.getElementById(errorField).textContent = extractErrorMessage(result.error.message);
-      // Highlight in red color
       document.getElementById(errorField).style.color = "red";
       throw result.error;
     }
     handleTransactionSuccess(result);
-
     // await fetchUserPosition(accountAddress);
   };
 }
@@ -96,13 +74,10 @@ function createTransactionOnButtonClick(elementId, method, errorField) {
       version: 1,
     });
     if (result.isErr()) {
-      console.log(`${method} User Error: `, result.error);
       document.getElementById(errorField).textContent = extractErrorMessage(result.error.message);
-      // Highlight in red color
       document.getElementById(errorField).style.color = "red";
       throw result.error;
     }
-
     // await fetchUserPosition(accountAddress);
   };
 }
@@ -110,14 +85,12 @@ function createTransactionOnButtonClick(elementId, method, errorField) {
 // ***** Utility function *****
 function generateManifest(method, inputValue, inputValue2) {
   let code;
-  let accAdd;
   let accountAddressFrom = document.getElementById('accountAddress').value;
   switch (method) {
     case 'lend_tokens':
-      accAdd = inputValue2;
       code = `
         CALL_METHOD
-          Address("${accAdd}")
+          Address("${accountAddressFrom}")
           "withdraw"    
           Address("${xrdAddress}")
           Decimal("${inputValue}");
@@ -125,7 +98,7 @@ function generateManifest(method, inputValue, inputValue2) {
           Address("${xrdAddress}")
           Bucket("xrd");
         CALL_METHOD
-          Address("${accAdd}")
+          Address("${accountAddressFrom}")
           "withdraw"    
           Address("${lnd_resourceAddress}")
           Decimal("1");
@@ -138,7 +111,7 @@ function generateManifest(method, inputValue, inputValue2) {
           Bucket("xrd")
           Bucket("nft");
         CALL_METHOD
-          Address("${accAdd}")
+          Address("${accountAddressFrom}")
           "deposit_batch"
           Expression("ENTIRE_WORKTOP");
           `;
@@ -196,10 +169,9 @@ function generateManifest(method, inputValue, inputValue2) {
       `;
       break;      
     case 'takes_back':
-      accAdd = inputValue2;
       code = `
         CALL_METHOD
-          Address("${accAdd}")
+          Address("${accountAddressFrom}")
           "withdraw"    
           Address("${lnd_tokenAddress}")
           Decimal("${inputValue}");
@@ -208,7 +180,7 @@ function generateManifest(method, inputValue, inputValue2) {
           Decimal("${inputValue}")
           Bucket("loan");
         CALL_METHOD
-          Address("${accAdd}")
+          Address("${accountAddressFrom}")
           "withdraw"    
           Address("${lnd_resourceAddress}")
           Decimal("1");
@@ -222,7 +194,7 @@ function generateManifest(method, inputValue, inputValue2) {
           Bucket("loan")
           Bucket("nft");
         CALL_METHOD
-          Address("${accAdd}")
+          Address("${accountAddressFrom}")
           "deposit_batch"
           Expression("ENTIRE_WORKTOP");
           `;
@@ -304,11 +276,9 @@ function generateManifest(method, inputValue, inputValue2) {
             `;
         break;           
         case 'borrow':
-          accAdd = accountAddressFrom;
-          //I am getting the accountAddress from the method's signature
           code = `
           CALL_METHOD
-            Address("${accAdd}")
+            Address("${accountAddressFrom}")
             "withdraw"    
             Address("${lnd_resourceAddress}")
             Decimal("1");
@@ -321,20 +291,18 @@ function generateManifest(method, inputValue, inputValue2) {
             "borrow"
             Decimal("${inputValue}")
             Bucket("nft")
-            "${accAdd}"
+            "${accountAddressFrom}"
             Decimal("${inputValue2}");
           CALL_METHOD
-            Address("${accAdd}")
+            Address("${accountAddressFrom}")
             "deposit_batch"
             Expression("ENTIRE_WORKTOP");
             `;
         break;   
         case 'repay':
-          accAdd = inputValue2;
-          //I am getting the accountAddress from the method's signature
           code = `
           CALL_METHOD
-            Address("${accAdd}")
+            Address("${accountAddressFrom}")
             "withdraw"    
             Address("${lnd_resourceAddress}")
             Decimal("1");
@@ -343,7 +311,7 @@ function generateManifest(method, inputValue, inputValue2) {
             Decimal("1")
             Bucket("nft");  
           CALL_METHOD
-            Address("${accAdd}")
+            Address("${accountAddressFrom}")
             "withdraw"    
             Address("${xrdAddress}")
             Decimal("${inputValue}");
@@ -356,9 +324,9 @@ function generateManifest(method, inputValue, inputValue2) {
             "repay"
             Bucket("repay")
             Bucket("nft")
-            "${accAdd}";
+            "${accountAddressFrom}";
           CALL_METHOD
-            Address("${accAdd}")
+            Address("${accountAddressFrom}")
             "deposit_batch"
             Expression("ENTIRE_WORKTOP");
             `;
@@ -403,7 +371,6 @@ createTransactionOnClick('borrow', 'numberOfRequestedXrdTokens', 'expectedBorrow
 createTransactionOnClick('repay', 'numberOfRepaiedXrdTokens', 'accountAddress', 'repay', 'repayTxResult');
 
 createTransactionOnClick('fundDevelopment', 'numberOfFundedTokens', 'accountAddress', 'fund', 'fundTxResult');
-
 
 
 function extractErrorMessage(inputString) {

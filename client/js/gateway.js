@@ -1,7 +1,5 @@
 import { RadixDappToolkit, DataRequestBuilder, RadixNetwork, NonFungibleIdType } from '@radixdlt/radix-dapp-toolkit'
-// You can create a dApp definition in the dev console at https://stokenet-console.radixdlt.com/dapp-metadata 
-// then use that account for your dAppId
-// Set an environment variable to indicate the current environment
+
 const environment = process.env.NODE_ENV || 'Stokenet'; // Default to 'development' if NODE_ENV is not set
 console.log("environment (gateway.js): ", environment)
 // Define constants based on the environment
@@ -18,7 +16,6 @@ if (environment == 'production') {
   gwUrl = import.meta.env.VITE_GATEWAY_URL;
 }
 console.log("gw url (gateway.js): ", gwUrl)
-console.log("networkId (gateway.js): ", networkId)
 
 // Instantiate DappToolkit
 export const rdt = RadixDappToolkit({
@@ -29,19 +26,12 @@ export const rdt = RadixDappToolkit({
   ,onDisconnect: () => {
     // clear your application state
     localStorage.removeItem('accountAddress')
-    console.log("removeItem accountAddress")
     cleanUserPosition();
   }
-  // ,onInit: () => {
-  //   console.log("onInit")
-  // }
 });
-// console.log("dApp Toolkit: ", rdt)
-// export { rdt };
 
 // Global states
 let componentAddress = import.meta.env.VITE_COMP_ADDRESS //LendingDApp component address on stokenet
-// You receive this badge(your resource address will be different) when you instantiate the component
 let admin_badge = import.meta.env.VITE_ADMIN_BADGE
 let owner_badge = import.meta.env.VITE_OWNER_BADGE
 let lnd_resourceAddress = import.meta.env.VITE_LND_RESOURCE_ADDRESS // XRD lender badge manager
@@ -53,14 +43,11 @@ let accountAddress;
 
   // ************ Fetch the user's account address (Page Load) ************
   rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
-  // rdt.walletApi.sendRequest();
   // Subscribe to updates to the user's shared wallet data
   const subscription = rdt.walletApi.walletData$.subscribe((walletData) => {
-    console.log("subscription wallet data: ", walletData)
     accountAddress = walletData && walletData.accounts && walletData.accounts.length>0 ? walletData.accounts[0].address : null
     console.log("accountAddress : ", accountAddress)
     if (accountAddress!=null) {
-      console.log("accountAddress(gateway.js) : ", accountAddress)
       document.getElementById('accountAddress').value = accountAddress
 
       // Store the accountAddress in localStorage
@@ -76,10 +63,6 @@ let accountAddress;
       fetchComponentConfig(componentAddress);
     }
   })
-  // subscription.unsubscribe();
-
-
-
 
 
 // *********** Fetch Component Config (/state/entity/details) (Gateway) ***********
@@ -124,12 +107,7 @@ export async function fetchComponentConfig(componentAddress) {
     rewardTypeConfig.textContent = rewardTypeValue;
     borrowingsPoolConfig.textContent = maxBorrowValue;
 
-    // borrowersConfig.textContent = openBorrowing;
-    // borrowersLink.href = 'https://stokenet-dashboard.radixdlt.com/account/'+openBorrowing+'/nfts';
-    // document.getElementById("currentEpoch").textContent = currentEpoch;
-
-    //TODO array
-    // Call the function to update the links
+    //Call the function to update the links
     updateBorrowersLinks(openBorrowing);
   })
   .catch(error => {
@@ -140,7 +118,6 @@ export async function fetchComponentConfig(componentAddress) {
 //for showing current borrowings
 function updateBorrowersLinks(openBorrowingArray) {
   const borrowersLinksContainer = document.getElementById('borrowers-links-container');
-  // console.log('Container:', borrowersLinksContainer);
 
   // Clear existing content in the container
   borrowersLinksContainer.innerHTML = '';
@@ -168,21 +145,12 @@ function createBorrowerLink(borrower) {
   link.className = 'number'; // Apply the same styling as the original link
   link.innerText = borrower.substring(borrower.length-10);
 
-  // Create a div for each link
-  // const div = document.createElement('div');
-  // div.textContent = borrower; // Set the text content to the borrower value
-
-  // Append the div to the link
-  // link.appendChild(div);
-
   // Append the link to the list item
   listItem.appendChild(link);
 
   return listItem;
 }
-
-
-
+s
 function getCurrentEpoch(data) {
   const currentEpoch = data.details.state.fields.find(field => field.field_name === "reward");
   return currentEpoch ? currentEpoch.value : null;
@@ -225,8 +193,6 @@ function getOpenBorrowing(data) {
       return element.fields;
     });
 
-    // console.log("rootFields:", rootFields);
-
     // Check if the "rootFields" array is not empty
     if (rootFields.length > 0) {
       // Assuming each "fields" has an array of items with a "value" field
@@ -234,39 +200,13 @@ function getOpenBorrowing(data) {
         .flatMap(item => item) // Flatten the array of arrays
         .map(innerItem => innerItem.value);
 
-      // console.log("elementsFieldsArray:", elementsFieldsArray);
-
       // Return the extracted values
       return elementsFieldsArray;
     }
   }
-
   // Return an empty array if something went wrong or the structure is not as expected
   return [];
 }
-
-
-// function getOpenBorrowing(data) {
-//     const borrowersAccountsField = data.details.state.fields.find(field => field.field_name === "borrowers_accounts");
-//     console.log("borrowers_accounts:", borrowersAccountsField);
-//     // Check if the "borrowers_accounts" field exists
-//     if (borrowersAccountsField) {
-//       // Find all elements with "field_name" equal to "fields"
-//       const rootFields = borrowersAccountsField.elements
-//         // .filter(element => element.field_name === "fields")
-//         .map(element => element.fields); // Extract the "elements" property
-//       console.log("rootFields:", rootFields);
-
-//       // Check if the "rootFields" array is not empty
-//       if (rootFields.length > 0) {
-//         // Assuming each "fields" has an array of items
-//         const elementsFieldsArray = rootFields.map(item => item.value ); 
-//         console.log("elementsFieldsArray:", elementsFieldsArray);
-//         // Return the extracted values
-//         return elementsFieldsArray;
-//       }
-//   }
-// }
 
 
 // ************ Utility Function (Gateway) *****************
@@ -315,7 +255,6 @@ function generatePayload(method, address, type) {
   }
   return code;
 }
-
 
 // *********** Fetch User NFT Metadata Information (/entity/details) (Gateway) ***********
 export async function fetchUserPosition(accountAddress) {
@@ -379,7 +318,6 @@ function getVaultsByResourceAddress(jsonData, resourceAddress) {
       );
       
       matchingResources.forEach(resource => {
-        // console.log(" matchingResources " + JSON.stringify(resource));
         if (resource.vaults && resource.vaults.total_count > 0) {
           result.push(...resource.vaults.items);
         }
@@ -430,8 +368,6 @@ async function fetchNftMetadata(resourceAddress, item) {
     const epochBorrowDiv = document.getElementById("epochBorrow");
     const expectedEpochBorrowDiv = document.getElementById("expectedEpochBorrow");
     const epochRepayDiv = document.getElementById("epochRepay");
-    //next epoch
-    //const epochLiquidityNextDiv = document.getElementById("epochLiquidityNext");
     // Find the input element by its ID
     const numberOfTokensInput = document.getElementById("numberOfTokens");
 
@@ -447,10 +383,6 @@ async function fetchNftMetadata(resourceAddress, item) {
     const expectedEpochBorrowValue = parseFloat(extractedValues.find(field => field.field_name === "expected_end_borrow_epoch").value) || 0;;
     expectedEpochBorrowDiv.textContent = expectedEpochBorrowValue
     epochRepayDiv.textContent = extractedValues.find(field => field.field_name === "end_borrow_epoch").value
-    // update the sum
-    // const currentValueEpochLength = parseFloat(periodLengthConfig.textContent) || 0; 
-    // const sumValue = startLendingEpochValue + currentValueEpochLength;
-    // epochLiquidityNextDiv.textContent = sumValue;
   })
   .catch(error => {
       console.error('Error fetching data:', error);
@@ -472,16 +404,13 @@ async function cleanUserPosition() {
 }
 
 
-
 // *********** Fetch Main Pool size (Gateway) ***********
 export async function fetchMainPoolSize(component, xrdAddress) {
   // Define the data to be sent in the POST request.
-  // console.log('Request data for Main Pool size for component = ', `${component}`)
   const requestData = `{
       "address": "${component}",
       "resource_address": "${xrdAddress}"
   }`;
-  // console.log('Request data for Main Pool size', requestData)
 
   // Make an HTTP POST request to the gateway
   fetch(gwUrl+'/state/entity/page/fungible-vaults/', {
