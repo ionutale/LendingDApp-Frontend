@@ -3,18 +3,18 @@ import { RadixDappToolkit, DataRequestBuilder, RadixNetwork, NonFungibleIdType }
 const environment = process.env.NODE_ENV || 'Stokenet'; // Default to 'development' if NODE_ENV is not set
 console.log("environment (gateway.js): ", environment)
 // Define constants based on the environment
-let dAppId, networkId, gwUrl;
+let dAppId, networkId, gwUrl, dashboardUrl;
 
 if (environment == 'production') {
   dAppId = import.meta.env.VITE_DAPP_ID
   networkId = RadixNetwork.Mainnet;
-  gwUrl = import.meta.env.VITE_GATEWAY_URL;
 } else {
   // Default to Stokenet configuration
   dAppId = import.meta.env.VITE_DAPP_ID
   networkId = RadixNetwork.Stokenet;
-  gwUrl = import.meta.env.VITE_GATEWAY_URL;
 }
+gwUrl = import.meta.env.VITE_GATEWAY_URL;
+dashboardUrl = import.meta.env.DASHBOARD_URL;
 console.log("gw url (gateway.js): ", gwUrl)
 
 // Instantiate DappToolkit
@@ -140,7 +140,7 @@ function createBorrowerLink(borrower) {
   const link = document.createElement('a');
   
   // Set attributes for the link
-  link.href = 'https://stokenet-dashboard.radixdlt.com/account/' + borrower + '/nfts';
+  link.href = dashboardUrl+'/account/' + borrower + '/nfts';
   link.target = '_new';
   link.className = 'number'; // Apply the same styling as the original link
   link.innerText = borrower.substring(borrower.length-10);
