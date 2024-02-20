@@ -22,6 +22,8 @@
     </div>
   </div>
 
+  <input type="hidden" placeholder="Account address" id="accountAddress">
+  
   <section>
     <div class="content-wrapper">    
       <h1>DApp Tuning</h1>
@@ -38,12 +40,12 @@
         <input type="text" placeholder="Interest" id="interest">
       </div>
 
-      <br><br>
+      <!-- <br><br>
       Sets the length of the period beyond which liquidity can be provided again (Admin or Owner badge needed)
       <p><button id="setPeriodLength">Sets the length of the period</button></p>
       <div class="number">
        <input type="text" placeholder="Sets Period Length" id="periodLength">
-      </div>
+      </div> -->
 
       <br><br>
       Extend the Lending Pool size by the specified number of token (Admin or Owner or Staff badge needed)
@@ -62,7 +64,7 @@
     </div>
 
     <div class="content-wrapper">   
-      <h1>Administrative Function</h1>
+      <h1>Admin Function (Funding)</h1>
       Withdraw Fund for the development of the project (Owner badge needed)
       <p><button id="WithdrawEarnings">Withdraw Fund</button></p>
       <div class="number">
@@ -75,25 +77,31 @@
       <div class="number">
         <input type="text" placeholder="Number of Token" id="numberOfFundedTokens">
       </div>
+    </div>
 
-      <br>
-      <h1>Staff Badges</h1>
+    <div class="content-wrapper">   
+      <h1>Admin Function (Badges & NFT)</h1>
+      <h3>Staff Badges</h3>
       Mint a Staff Badge (Admin or Owner badge needed)
       <p><button id="mintStaffBadge">Mint Staff Badge</button></p>
       <div class="number">
         <input type="text" placeholder="staffUsername" id="staffUsername">
       </div>
 
-      <br>
-      <h1>Recall Late Borrowers</h1>
+      <h3>Bad Payer NFT</h3>
+      Mint a BadPayer (Admin or Owner badge needed)
+      <input type="hidden" placeholder="badPayerNft" id="badPayerNft">
+      <p><button id="mintBadPayerNft">Mint BadPayer NFT</button></p>
+
+      <br><br>
+      <h3>Recall Late Borrowers</h3>
       Ask late borrowers to repay loans  (Admin or Owner badge needed)
       <p><button id="askRepay">Ask Loans repayments</button></p> 
 
       <br>
-      <h1>Release late borrowers who have repaid</h1>
+      <h3>Release late borrowers who have repaid</h3>
       Recall 'Bad Borrowers' NFT after the loan has been repaid (Admin or Owner badge needed)
       <p><button id="releaseLateBorrowers">Recall BadPayer NFTs</button></p> 
-
     </div>
 
   </section>

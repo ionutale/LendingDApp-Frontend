@@ -150,7 +150,7 @@ function createBorrowerLink(borrower) {
 
   return listItem;
 }
-s
+
 function getCurrentEpoch(data) {
   const currentEpoch = data.details.state.fields.find(field => field.field_name === "reward");
   return currentEpoch ? currentEpoch.value : null;

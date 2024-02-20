@@ -57,13 +57,14 @@ if (storedAccountAddress) {
   rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
   // Subscribe to updates to the user's shared wallet data
   rdt.walletApi.walletData$.subscribe((walletData) => {
-    // console.log("subscription wallet data: ", walletData)
     accountAddress = walletData.accounts[0].address
     document.getElementById('accountAddress').value = accountAddress
     // Store the accountAddress in localStorage
     localStorage.setItem('adminAccountAddress', accountAddress);
   })
 }  
+
+console.log(" wallet accountAddress: ", accountAddress)
 
 
 // ************ Utility Function (Gateway) *****************
@@ -207,6 +208,7 @@ function createAskRepayTransactionOnClick(method) {
 function fetchDataAndNftId(selectedNfResource) {
   let nftHolders = [];
   let selectedFromAccount = 'idontknow';
+  console.log(" Fetching nft holders of {}" , selectedNfResource);
   nftHolders =
       rdt.gatewayApi.state
         .getNonFungibleIds(selectedNfResource)
@@ -268,7 +270,8 @@ function createReleaseLateBorrowersTransactionOnClick(method) {
       }));
 
       //quick way to exclude the owner address, otherwise it moves the nft from the same address
-      const excludedVaultAddress = "internal_vault_tdx_2_1nqu5yae8d5lxrul4k0ydukj3nu6lmsnnuajdehvfg5rfj8xxftcqc3";
+      // const excludedVaultAddress = "internal_vault_tdx_2_1nqu5yae8d5lxrul4k0ydukj3nu6lmsnnuajdehvfg5rfj8xxftcqc3";
+      const excludedVaultAddress = "internal_vault_tdx_2_1nrzy5xrx6thuquumd56kelny8z37sxrsr57zshl3z9h3pf9uq5utk2";
       
       const recallNfts = nftsToRecall
         .filter(({ vaultAddress }) => vaultAddress !== excludedVaultAddress)
@@ -401,6 +404,23 @@ function generateManifest(method, inputValue) {
           Expression("ENTIRE_WORKTOP");
         `;
     break;
+    case 'mint_bad_payer':
+      code = ` 
+        CALL_METHOD
+          Address("${accountAddress}")
+          "create_proof_of_amount"    
+          Address("${admin_badge}")
+          Decimal("1");
+        CALL_METHOD
+          Address("${componentAddress}")
+          "mint_bad_payer";
+        CALL_METHOD
+          Address("${accountAddress}")
+          "try_deposit_batch_or_refund"
+          Expression("ENTIRE_WORKTOP")
+          Enum<0u8>();
+        `;
+    break;
     case 'extend_lending_pool':
       code = ` 
         CALL_METHOD
@@ -505,7 +525,8 @@ function generateManifest(method, inputValue) {
 // Usage
 createTransactionOnClick('WithdrawEarnings', 'numberOfEarnedToken', 'withdraw_earnings');
 createTransactionOnClick('mintStaffBadge', 'staffUsername', 'mint_staff_badge');
-createTransactionOnClick('setPeriodLength', 'periodLength', 'set_period_length');
+createTransactionOnClick('mintBadPayerNft', 'badPayerNft', 'mint_bad_payer');
+// createTransactionOnClick('setPeriodLength', 'periodLength', 'set_period_length');
 createTransactionOnClick('extendLendingPool', 'extendLendingPoolAmount', 'extend_lending_pool');
 createTransactionOnClick('extendBorrowingPool', 'extendBorrowingPoolAmount', 'extend_borrowing_pool');
 createTransactionOnClick('setReward', 'reward', 'set_reward');
