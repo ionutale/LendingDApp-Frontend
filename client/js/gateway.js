@@ -14,8 +14,9 @@ if (environment == 'production') {
   networkId = RadixNetwork.Stokenet;
 }
 gwUrl = import.meta.env.VITE_GATEWAY_URL;
-dashboardUrl = import.meta.env.DASHBOARD_URL;
+dashboardUrl = import.meta.env.VITE_DASHBOARD_URL;
 console.log("gw url (gateway.js): ", gwUrl)
+console.log("dashboard url (gateway.js): ", dashboardUrl)
 
 // Instantiate DappToolkit
 export const rdt = RadixDappToolkit({
