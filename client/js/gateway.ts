@@ -3,7 +3,7 @@ import { RadixDappToolkit, DataRequestBuilder, RadixNetwork, createLogger, NonFu
 const environment = process.env.NODE_ENV || 'Stokenet'; // Default to 'development' if NODE_ENV is not set
 console.log("environment (gateway.js): ", environment)
 // Define constants based on the environment
-let dAppId, networkId, gwUrl, dashboardUrl;
+let dAppId, networkId, gwUrl: string, dashboardUrl: string;
 
 if (environment == 'production') {
   dAppId = import.meta.env.VITE_DAPP_ID
@@ -17,6 +17,10 @@ gwUrl = import.meta.env.VITE_GATEWAY_URL;
 dashboardUrl = import.meta.env.VITE_DASHBOARD_URL;
 console.log("gw url (gateway.js): ", gwUrl)
 console.log("dashboard url (gateway.js): ", dashboardUrl)
+
+let rolaUrl = import.meta.env.VITE_ROLA_URL
+// let rolaEnabled: Boolean = import.meta.env.VITE_ROLA_ENABLED
+console.log("rola url (gateway.js): ", rolaUrl)
 
 // Instantiate DappToolkit
 export const rdt = RadixDappToolkit({
@@ -41,16 +45,14 @@ let lnd_tokenAddress = import.meta.env.VITE_LND_TOKEN_ADDRESS // LND token resou
 
 let xrdAddress = import.meta.env.VITE_XRD //Stokenet XRD resource address
 
-let rolaUrl = import.meta.env.VITE_ROLA_URL
-
-let accountAddress;
+let accountAddress: string | null;
 
   // ************ Fetch the user's account address (Page Load) ************
-  // rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
-  rdt.walletApi.setRequestData(
-    DataRequestBuilder.persona().withProof(),
-    DataRequestBuilder.accounts().atLeast(1).withProof()
-  )
+  rdt.walletApi.setRequestData(DataRequestBuilder.accounts().atLeast(1))
+  // rdt.walletApi.setRequestData(
+  //   DataRequestBuilder.persona().withProof(),
+  //   DataRequestBuilder.accounts().atLeast(1).withProof()
+  // )
   
   // Subscribe to updates to the user's shared wallet data
   const subscription = rdt.walletApi.walletData$.subscribe((walletData) => {
@@ -58,7 +60,7 @@ let accountAddress;
     console.log("accountAddress : ", accountAddress)
     if (accountAddress!=null) {
       // document?.getElementById('accountAddress')?.value = accountAddress
-      const accountAddress = "exampleAddress"; // Example address, replace with your actual logic to get the address
+      // const accountAddress = "exampleAddress"; // Example address, replace with your actual logic to get the address
       const element = document?.getElementById('accountAddress') as HTMLInputElement | null;
       if (element) {
           element.value = accountAddress ?? '';
@@ -78,56 +80,49 @@ let accountAddress;
     }
   })
 
-  const getChallenge: () => Promise<string> = () =>
-  fetch(rolaUrl+'api/create-challenge', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Basic ' + btoa('test:test') // Replace 'username' and 'password' with your actual credentials
-      },
-      body: JSON.stringify({
-        "applicationName": "Trapezite",
-        "dAppDefinitionAddress": "${dAppId}",
-        "origin": "https://test.zerocollateral.eu/",
-        "timeout": 60,
-        "networkId": 1
-      })
-    })
-      .then((res) => res.json())
-      .then((res) => res.challenge);
-    
 
-  rdt.walletApi.provideChallengeGenerator(getChallenge)
-
-  const rolaResultElement = document.getElementById('rola-result')!
-
-  rdt.walletApi.dataRequestControl(async ({ proofs }) => {
-    await fetch(rolaUrl+'api/verify', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Basic ' + btoa('test:test') // Replace 'username' and 'password' with your actual credentials
-      },
-      body: JSON.stringify(proofs),
-    })
-    .then((res): Promise<{ valid: boolean }> => res.json())
-    .then((data) => {
-      console.log("Rola verified : ", data.valid)
-      // Assuming 'resultDiv' is the ID of the div where you want to display the response
-      rolaResultElement.textContent = JSON.stringify(data.valid);
-    })
-
-    // rolaResultElement.textContent = JSON.stringify(
-    //   proofs.map((item) => ({ ...item, rolaVerified: valid })),
-    //   null,
-    //   2
-    // )
-
-  })
+  // const getChallenge: () => Promise<string> = () =>
+  // fetch(rolaUrl+'api/create-challenge', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       'Authorization': 'Basic ' + btoa('test:test') // Replace 'username' and 'password' with your actual credentials
+  //     },
+  //     body: JSON.stringify({
+  //       "applicationName": "Trapezite",
+  //       "dAppDefinitionAddress": "${dAppId}",
+  //       "origin": "https://test.zerocollateral.eu/",
+  //       "timeout": 60,
+  //       "networkId": 1
+  //     })
+  //   })
+  //     .then((res) => res.json())
+  //     .then((res) => res.challenge);
+      
+  // if (rolaEnabled) {
+  //   rdt.walletApi.provideChallengeGenerator(getChallenge)
+  //   // const rolaResultElement = document.getElementById('rola-result')!
+  //   rdt.walletApi.dataRequestControl(async ({ proofs }) => {
+  //     await fetch(rolaUrl+'api/verify', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': 'Basic ' + btoa('test:test') // Replace 'username' and 'password' with your actual credentials
+  //       },
+  //       body: JSON.stringify(proofs),
+  //     })
+  //     .then((res): Promise<{ valid: boolean }> => res.json())
+  //     .then((data) => {
+  //       console.log("Rola verified : ", data.valid)
+  //       // Assuming 'resultDiv' is the ID of the div where you want to display the response
+  //       // rolaResultElement.textContent = JSON.stringify(data.valid);
+  //     })
+  //   })
+  // }
 
 
 // *********** Fetch Component Config (/state/entity/details) (Gateway) ***********
-export async function fetchComponentConfig(componentAddress) {
+export async function fetchComponentConfig(_componentAddress: any) {
   // Define the data to be sent in the POST request.
   const requestData = generatePayload("ComponentConfig", "", "Global");
 
@@ -152,6 +147,9 @@ export async function fetchComponentConfig(componentAddress) {
     //get open borrowing
     const openBorrowing = getOpenBorrowing(json);
     console.log("openBorrowing:", openBorrowing);
+    //get late payers
+    const openLatePayers = getLatePayers(json);
+    console.log("openLatePayers:", openLatePayers);
 
     // console.log("Reward:", rewardValue);
     // console.log("Period Length:", periodLengthValue);
@@ -172,8 +170,8 @@ export async function fetchComponentConfig(componentAddress) {
     if (rewardTypeConfig) rewardTypeConfig.textContent = rewardTypeValue ?? '';
     if (borrowingsPoolConfig) borrowingsPoolConfig.textContent = maxBorrowValue ?? '';
 
-    //Call the function to update the links
     updateBorrowersLinks(openBorrowing);
+    updateLatePayersLinks(openLatePayers);
   })
   .catch(error => {
       console.error('Error fetching data:', error);
@@ -181,7 +179,7 @@ export async function fetchComponentConfig(componentAddress) {
 }
 
 //for showing current borrowings
-function updateBorrowersLinks(openBorrowingArray) {
+function updateBorrowersLinks(openBorrowingArray: any[]) {
   const borrowersLinksContainer = document.getElementById('borrowers-links-container');
 
   // Clear existing content in the container
@@ -189,7 +187,7 @@ function updateBorrowersLinks(openBorrowingArray) {
   if (borrowersLinksContainer) borrowersLinksContainer.innerHTML = '';
 
   // Iterate through the openBorrowingArray and create links for each borrower
-  openBorrowingArray.forEach(borrower => {
+  openBorrowingArray.forEach((borrower: any) => {
     const link = createBorrowerLink(borrower);
 
     // Append the link to the container
@@ -198,7 +196,7 @@ function updateBorrowersLinks(openBorrowingArray) {
 }
 
 //for showing current borrowings
-function createBorrowerLink(borrower) {
+function createBorrowerLink(borrower: string) {
   // Create a new list item for each link
   const listItem = document.createElement('li');
 
@@ -217,44 +215,81 @@ function createBorrowerLink(borrower) {
   return listItem;
 }
 
-function getCurrentEpoch(data) {
-  const currentEpoch = data.details.state.fields.find(field => field.field_name === "reward");
+
+//for showing current borrowings //to be reviewd and merged
+function updateLatePayersLinks(openBorrowingArray: any[]) {
+  const borrowersLinksContainer = document.getElementById('badpayers-links-container');
+
+  // Clear existing content in the container
+  // borrowersLinksContainer.innerHTML = '';
+  if (borrowersLinksContainer) borrowersLinksContainer.innerHTML = '';
+
+  // Iterate through the openBorrowingArray and create links for each borrower
+  openBorrowingArray.forEach((borrower: any) => {
+    const link = createBorrowerLink(borrower);
+
+    // Append the link to the container
+    if (borrowersLinksContainer) borrowersLinksContainer.appendChild(link);
+  });
+}
+
+//for showing current late payers //to be reviewd and merged
+function createLatePayersLink(borrower: string) {
+  // Create a new list item for each link
+  const listItem = document.createElement('li');
+
+  // Create a new link element
+  const link = document.createElement('a');
+  
+  // Set attributes for the link
+  link.href = dashboardUrl+'/account/' + borrower + '/nfts';
+  link.target = '_new';
+  link.className = 'number'; // Apply the same styling as the original link
+  link.innerText = borrower.substring(borrower.length-10);
+
+  // Append the link to the list item
+  listItem.appendChild(link);
+  return listItem;
+}
+
+function getCurrentEpoch(data: { details: { state: { fields: any[]; }; }; }) {
+  const currentEpoch = data.details.state.fields.find((field: { field_name: string; }) => field.field_name === "reward");
   return currentEpoch ? currentEpoch.value : null;
 }
 
-function getReward(data) {
-  const rewardField = data.details.state.fields.find(field => field.field_name === "reward");
+function getReward(data: { details: { state: { fields: any[]; }; }; }) {
+  const rewardField = data.details.state.fields.find((field: { field_name: string; }) => field.field_name === "reward");
   return rewardField ? rewardField.value : null;
 }
 
-function getInterest(data) {
-  const rewardField = data.details.state.fields.find(field => field.field_name === "interest");
+function getInterest(data: { details: { state: { fields: any[]; }; }; }) {
+  const rewardField = data.details.state.fields.find((field: { field_name: string; }) => field.field_name === "interest");
   return rewardField ? rewardField.value : null;
 }
 
-function getRewardType(data) {
-  const rewardField = data.details.state.fields.find(field => field.field_name === "reward_type");
+function getRewardType(data: { details: { state: { fields: any[]; }; }; }) {
+  const rewardField = data.details.state.fields.find((field: { field_name: string; }) => field.field_name === "reward_type");
   return rewardField ? rewardField.value : null;
 }
 
-function getPeriodLength(data) {
-  const periodLengthField = data.details.state.fields.find(field => field.field_name === "period_length");
+function getPeriodLength(data: { details: { state: { fields: any[]; }; }; }) {
+  const periodLengthField = data.details.state.fields.find((field: { field_name: string; }) => field.field_name === "period_length");
   return periodLengthField ? periodLengthField.value : null;
 }
 
-function getBorrowMaxLimit(data) {
-  const rewardField = data.details.state.fields.find(field => field.field_name === "max_borrowing_limit");
+function getBorrowMaxLimit(data: { details: { state: { fields: any[]; }; }; }) {
+  const rewardField = data.details.state.fields.find((field: { field_name: string; }) => field.field_name === "max_borrowing_limit");
   return rewardField ? rewardField.value : null;
 }
 
-function getOpenBorrowing(data) {
-  const borrowersAccountsField = data.details.state.fields.find(field => field.field_name === "borrowers_accounts");
+function getOpenBorrowing(data: { details: { state: { fields: any[]; }; }; }) {
+  const borrowersAccountsField = data.details.state.fields.find((field: { field_name: string; }) => field.field_name === "borrowers_accounts");
   console.log("borrowers_accounts:", borrowersAccountsField);
 
   // Check if the "borrowers_accounts" field exists
   if (borrowersAccountsField) {
     // Assuming each element is a Tuple with "fields" property
-    const rootFields = borrowersAccountsField.elements.map(element => {
+    const rootFields = borrowersAccountsField.elements.map((element: { fields: any; }) => {
       // Assuming each element has "fields" property
       return element.fields;
     });
@@ -263,8 +298,8 @@ function getOpenBorrowing(data) {
     if (rootFields.length > 0) {
       // Assuming each "fields" has an array of items with a "value" field
       const elementsFieldsArray = rootFields
-        .flatMap(item => item) // Flatten the array of arrays
-        .map(innerItem => innerItem.value);
+        .flatMap((item: any) => item) // Flatten the array of arrays
+        .map((innerItem: { value: any; }) => innerItem.value);
 
       // Return the extracted values
       return elementsFieldsArray;
@@ -275,8 +310,28 @@ function getOpenBorrowing(data) {
 }
 
 
+function getLatePayers(data: { details: { state: { fields: any[]; }; }; }) {
+  const borrowersAccountsField = data.details.state.fields.find((field: { field_name: string; }) => field.field_name === "late_payers_accounts");
+  console.log("late_payers_accounts:", borrowersAccountsField);
+
+  // Check if the "borrowers_accounts" field exists
+  if (borrowersAccountsField) {
+    // Extract values from the elements array
+    const elements = borrowersAccountsField.elements;
+
+    // Extract only the values from each element
+    const values = elements.map((element: { value: string }) => element.value);
+
+    // Return the vector with only the values
+    return values;
+  }
+  // Return an empty array if something went wrong or the structure is not as expected
+  return []
+}
+
+
 // ************ Utility Function (Gateway) *****************
-function generatePayload(method, address, type) {
+function generatePayload(method: string, _address: string, _type: string) {
   let code;
   switch (method) {
     case 'ComponentConfig':
@@ -323,7 +378,7 @@ function generatePayload(method, address, type) {
 }
 
 // *********** Fetch User NFT Metadata Information (/entity/details) (Gateway) ***********
-export async function fetchUserPosition(accountAddress) {
+export async function fetchUserPosition(_accountAddress: string) {
   // Define the data to be sent in the POST request.
   const requestData = generatePayload("UserPosition", "", "Vault");
 
@@ -344,7 +399,7 @@ export async function fetchUserPosition(accountAddress) {
       const itemsArray = result && result.length>0 ? result[0].items : null
       console.log(" itemsArray " + itemsArray);
       // Loop through itemsArray and make GET requests for each item
-      itemsArray?.forEach(async (item) => {
+      itemsArray?.forEach(async (item: any) => {
         await fetchNftMetadata(resourceAddress, item);
       });
   })
@@ -354,16 +409,16 @@ export async function fetchUserPosition(accountAddress) {
 }
 
 // *********** Fetch User NFT Metadata Information (Filtering response) (Gateway Utility) ***********
-function getVaultsByResourceAddress(jsonData, resourceAddress) {
+function getVaultsByResourceAddress(jsonData: { items: never[]; }, resourceAddress: string) {
   const items = jsonData.items || [];
   // Filter items based on the resource_address
-  const filteredItems = items.filter(item => {
+  const filteredItems = items.filter((item: { non_fungible_resources: { items: any[]; }; }) => {
     return (
       item.non_fungible_resources &&
       item.non_fungible_resources.items &&
       item.non_fungible_resources.items.length > 0 &&
       item.non_fungible_resources.items.some(
-        resource =>
+        (        resource: { resource_address: any; }) =>
           resource.resource_address &&
           resource.resource_address === resourceAddress
       )
@@ -371,19 +426,19 @@ function getVaultsByResourceAddress(jsonData, resourceAddress) {
   });
 
   // Extract vaults from the filtered items
-  const vaults = filteredItems.reduce((result, item) => {
+  const vaults = filteredItems.reduce((result: any[], item: { non_fungible_resources: { items: any[]; }; }) => {
     if (
       item.non_fungible_resources &&
       item.non_fungible_resources.items &&
       item.non_fungible_resources.items.length > 0
     ) {
       const matchingResources = item.non_fungible_resources.items.filter(
-        resource =>
+        (        resource: { resource_address: any; }) =>
           resource.resource_address &&
           resource.resource_address === resourceAddress
       );
       
-      matchingResources.forEach(resource => {
+      matchingResources.forEach((resource: { vaults: { total_count: number; items: any; }; }) => {
         if (resource.vaults && resource.vaults.total_count > 0) {
           result.push(...resource.vaults.items);
         }
@@ -396,7 +451,7 @@ function getVaultsByResourceAddress(jsonData, resourceAddress) {
 }
 
 // *********** Fetch User NFT Metadata Information (/non-fungible/data) (Gateway Utility) ***********
-async function fetchNftMetadata(resourceAddress, item) {
+async function fetchNftMetadata(resourceAddress: string, item: any) {
   // Define the data to be sent in the GET request.
   const requestData = `{
     "resource_address": "${resourceAddress}",
@@ -416,10 +471,10 @@ async function fetchNftMetadata(resourceAddress, item) {
   .then(response => response.json()) 
   .then(data => { 
     // Extracting values from the nested structure
-    const extractedValues = [];
+    const extractedValues: { field_name: any; value: any; }[] = [];
 
-    data.non_fungible_ids.forEach((id) => {
-      id.data.programmatic_json.fields.forEach((field) => {
+    data.non_fungible_ids.forEach((id: { data: { programmatic_json: { fields: any[]; }; }; }) => {
+      id.data.programmatic_json.fields.forEach((field: { field_name: any; value: any; }) => {
         const { field_name, value } = field;
         extractedValues.push({ field_name, value });
       });
@@ -438,17 +493,17 @@ async function fetchNftMetadata(resourceAddress, item) {
     const numberOfTokensInput = document.getElementById("numberOfTokens");
 
     // Update the content of the div elements (lend)
-    amountLiquidityFundedDiv.textContent = extractedValues.find(field => field.field_name === "amount").value;
-    const startLendingEpochValue = parseFloat(extractedValues.find(field => field.field_name === "start_lending_epoch").value) || 0;;
-    epochLiquidityFundedDiv.textContent = startLendingEpochValue;
-    epochLiquidityReedemedDiv.textContent = extractedValues.find(field => field.field_name === "end_lending_epoch").value
+    amountLiquidityFundedDiv!.textContent = extractedValues.find(field => field.field_name === "amount")!.value;
+    const startLendingEpochValue = parseFloat(extractedValues.find(field => field.field_name === "start_lending_epoch")!.value) || 0;;
+    epochLiquidityFundedDiv!.textContent = startLendingEpochValue!.toString();
+    epochLiquidityReedemedDiv!.textContent = extractedValues.find(field => field.field_name === "end_lending_epoch")!.value
     // Update the content of the div elements (borrow)
-    amountBorrowingsDiv.textContent = extractedValues.find(field => field.field_name === "borrow_amount").value;
-    const epochBorrowValue = parseFloat(extractedValues.find(field => field.field_name === "start_borrow_epoch").value) || 0;;
-    epochBorrowDiv.textContent = epochBorrowValue;
-    const expectedEpochBorrowValue = parseFloat(extractedValues.find(field => field.field_name === "expected_end_borrow_epoch").value) || 0;;
-    expectedEpochBorrowDiv.textContent = expectedEpochBorrowValue
-    epochRepayDiv.textContent = extractedValues.find(field => field.field_name === "end_borrow_epoch").value
+    amountBorrowingsDiv!.textContent = extractedValues.find(field => field.field_name === "borrow_amount")!.value;
+    const epochBorrowValue = parseFloat(extractedValues.find(field => field.field_name === "start_borrow_epoch")!.value) || 0;;
+    epochBorrowDiv!.textContent = epochBorrowValue!.toString();
+    const expectedEpochBorrowValue = parseFloat(extractedValues.find(field => field.field_name === "expected_end_borrow_epoch")!.value) || 0;;
+    expectedEpochBorrowDiv!.textContent = expectedEpochBorrowValue!.toString();
+    epochRepayDiv!.textContent = extractedValues.find(field => field.field_name === "end_borrow_epoch")!.value
   })
   .catch(error => {
       console.error('Error fetching data:', error);
@@ -457,21 +512,21 @@ async function fetchNftMetadata(resourceAddress, item) {
 
 // *********** cleanUserPosition (Gateway) ***********
 async function cleanUserPosition() {
-    const amountLiquidityFundedDiv = document.getElementById("amountLiquidityFunded").textContent = "";
-    const epochLiquidityFundedDiv = document.getElementById("epochLiquidityFunded").textContent = "";
-    const epochLiquidityReedemedDiv = document.getElementById("epochLiquidityReedemed").textContent = "";
+    const amountLiquidityFundedDiv = document.getElementById("amountLiquidityFunded")!.textContent = "";
+    const epochLiquidityFundedDiv = document.getElementById("epochLiquidityFunded")!.textContent = "";
+    const epochLiquidityReedemedDiv = document.getElementById("epochLiquidityReedemed")!.textContent = "";
     
-    const amountBorrowingsDiv = document.getElementById("amountBorrowings").textContent = "";
-    const epochBorrowDiv = document.getElementById("epochBorrow").textContent = "";
-    const expectedEpochBorrowDiv = document.getElementById("expectedEpochBorrow").textContent = "";
-    const epochRepayDiv = document.getElementById("epochRepay").textContent = "";
+    const amountBorrowingsDiv = document.getElementById("amountBorrowings")!.textContent = "";
+    const epochBorrowDiv = document.getElementById("epochBorrow")!.textContent = "";
+    const expectedEpochBorrowDiv = document.getElementById("expectedEpochBorrow")!.textContent = "";
+    const epochRepayDiv = document.getElementById("epochRepay")!.textContent = "";
 
-    const numberOfTokensInput = document.getElementById("numberOfTokens").textContent = "";
+    const numberOfTokensInput = document.getElementById("numberOfTokens")!.textContent = "";
 }
 
 
 // *********** Fetch Main Pool size (Gateway) ***********
-export async function fetchMainPoolSize(component, xrdAddress) {
+export async function fetchMainPoolSize(component: any, xrdAddress: any) {
   // Define the data to be sent in the POST request.
   const requestData = `{
       "address": "${component}",
@@ -490,8 +545,8 @@ export async function fetchMainPoolSize(component, xrdAddress) {
   .then(data => { 
       // Check if the response has 'items' and process them.
       if (data && data.items && Array.isArray(data.items)) {
-          const amount = data.items.map(item => item.amount);
-          document.getElementById('mainPool').innerText = JSON.stringify(amount);
+          const amount = data.items.map((item: { amount: any; }) => item.amount);
+          document.getElementById('mainPool')!.innerText = JSON.stringify(amount);
       } else {
           console.error('Invalid response format.');
       }
@@ -502,7 +557,7 @@ export async function fetchMainPoolSize(component, xrdAddress) {
 }
 
 // *********** Fetch Lendings Pool size (Gateway) ***********
-export async function fetchLendingPoolSize(component, xrdAddress) {
+export async function fetchLendingPoolSize(component: any, _xrdAddress: any) {
   // Define the data to be sent in the POST request.
   const requestData = `{
     address: "${component}",
@@ -521,8 +576,8 @@ export async function fetchLendingPoolSize(component, xrdAddress) {
   .then(data => { 
       // Check if the response has 'items' and process them.
       if (data && data.items && Array.isArray(data.items)) {
-          const amount = data.items.map(item => item.amount);
-          document.getElementById('lendinsPool').innerText = JSON.stringify(amount);
+          const amount = data.items.map((item: { amount: any; }) => item.amount);
+          document.getElementById('lendinsPool')!.innerText = JSON.stringify(amount);
       } else {
           console.error('Invalid response format.');
       }

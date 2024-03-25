@@ -12,6 +12,7 @@ Configuration files store the data for the Stokenet and Mainnet environments, ma
 .env
 .env.staging 
 .env.production
+.env.local
 
 It is also present the file .well-known/radix.json for referring to the dApp id
 

@@ -29,9 +29,10 @@
 
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
-  <script type="module" src="js/gateway.js"></script>
+  <script type="module" src="js/gateway.ts"></script>
   <script type="module" src="js/index.js"></script>
   <script type="module" src="js/dates.js"></script>
+  
 
   <div class="big-container header">
       <div class="header-wrapper" >
@@ -192,11 +193,12 @@
       </div>
         
         <div class="content-wrapper">
-          <div class="row-wrapper">
             <h3>Current Borrowers</h3>
             <ul id="borrowers-links-container"></ul>
-          </div>
-      </div>
+            <h3>Current BadPayers</h3>
+            <ul id="badpayers-links-container"></ul>
+        </div>
+    </div>
 
   </section>
 
