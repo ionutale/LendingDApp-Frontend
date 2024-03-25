@@ -12,11 +12,12 @@
     "@types/node": "^20.10.2",
     "cross-env": "^7.0.3",
     "dotenv": "^16.3.1",
+    "typescript": "^5.0.2",
     "vite": "^4.1.0"
   },
   "dependencies": {
-    "@radixdlt/radix-dapp-toolkit": "^1.4.3",
     "@radixdlt/connect-button": "^1.0.4",
+    "@radixdlt/radix-dapp-toolkit": "^1.4.3",
     "fs": "^0.0.1-security"
   }
 }

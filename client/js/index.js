@@ -1,6 +1,6 @@
 import { RadixDappToolkit, DataRequestBuilder, RadixNetwork, NonFungibleIdType, OneTimeDataRequestBuilder } from '@radixdlt/radix-dapp-toolkit'
-import { fetchMainPoolSize, fetchLendingPoolSize, fetchUserPosition, fetchComponentConfig } from './gateway.js'; 
-import { rdt } from './gateway'; 
+import { fetchMainPoolSize, fetchLendingPoolSize, fetchUserPosition, fetchComponentConfig } from './gateway.ts'; 
+import { rdt } from './gateway.ts'; 
 
 const environment = process.env.NODE_ENV || 'Stokenet'; // Default to 'development' if NODE_ENV is not set
 console.log("environment (index.js): ", environment)
