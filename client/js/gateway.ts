@@ -1,4 +1,5 @@
 import { RadixDappToolkit, DataRequestBuilder, RadixNetwork, createLogger, NonFungibleIdType } from '@radixdlt/radix-dapp-toolkit'
+import { it } from 'node:test';
 
 const environment = process.env.NODE_ENV || 'Stokenet'; // Default to 'development' if NODE_ENV is not set
 console.log("environment (gateway.js): ", environment)
@@ -69,14 +70,32 @@ let accountAddress: string | null;
       // Store the accountAddress in localStorage
       localStorage.setItem('accountAddress', accountAddress);
 
+      interface Hashmap {
+        [key: string]: any;
+      }    
+      const hashmap: Hashmap = fetchComponentConfig(componentAddress)
+        .then((hashmap: Hashmap) => {
+          // Once the Promise resolves, call fetchMainPoolSize() with the resolved hashmap
+          fetchMainPoolSize(componentAddress, xrdAddress, hashmap)
+              .then((result) => {
+                  // You can work with the result of fetchMainPoolSize() here
+                  console.log("Main pool size fetched:", result);
+              })
+              .catch((error) => {
+                  // Handle errors if any occurred during the asynchronous operation
+                  console.error("Error occurred while fetching main pool size:", error);
+              });
+      })
+      //get config parameter of the component
+      console.log("Hashmap:", hashmap);
+      // hashmap.then ((it) -> console.log("Hashmap:", it))
+        
       //fill smart contract and account positions 
       //fetch pool size
-      fetchMainPoolSize(componentAddress, xrdAddress);
+      // fetchMainPoolSize(componentAddress, xrdAddress);
       fetchLendingPoolSize(componentAddress, xrdAddress);
       //fetch nft metadata info of the connected user
       fetchUserPosition(accountAddress);
-      //get config parameter of the component
-      fetchComponentConfig(componentAddress);
     }
   })
 
@@ -122,10 +141,13 @@ let accountAddress: string | null;
 
 
 // *********** Fetch Component Config (/state/entity/details) (Gateway) ***********
-export async function fetchComponentConfig(_componentAddress: any) {
+interface Hashmap {
+  [key: string]: any;
+}    
+export async function fetchComponentConfig(_componentAddress: any): Promise<Hashmap>  {
   // Define the data to be sent in the POST request.
   const requestData = generatePayload("ComponentConfig", "", "Global");
-
+  const hashmap: Hashmap = {};
   // Make an HTTP POST request to the gateway
   fetch(gwUrl+'/state/entity/details', {
       method: 'POST',
@@ -137,7 +159,7 @@ export async function fetchComponentConfig(_componentAddress: any) {
   .then(response => response.json()) // Assuming the response is JSON data.
   .then(data => { 
     const json = data.items ? data.items[0] : null;
-
+    
     const currentEpoch = data.ledger_state.epoch;
     const rewardValue = getReward(json);
     const interestValue = getInterest(json);
@@ -146,10 +168,17 @@ export async function fetchComponentConfig(_componentAddress: any) {
     const maxBorrowValue = getBorrowMaxLimit(json);
     //get open borrowing
     const openBorrowing = getOpenBorrowing(json);
-    console.log("openBorrowing:", openBorrowing);
+    // console.log("openBorrowing:", openBorrowing);
     //get late payers
     const openLatePayers = getLatePayers(json);
-    console.log("openLatePayers:", openLatePayers);
+    // console.log("openLatePayers:", openLatePayers);
+
+    // const collected_xrd = getDinamicVaultsSize(json, "collected_xrd");
+    // console.log("Collected Vault:", collected_xrd);
+    // const fee_xrd = getDinamicVaultsSize(json, "fee_xrd");
+    // console.log("Fee Vault:", fee_xrd);
+    // const donations_xrd = getDinamicVaultsSize(json, "donations_xrd");
+    // console.log("Donations Vault:", donations_xrd);    
 
     // console.log("Reward:", rewardValue);
     // console.log("Period Length:", periodLengthValue);
@@ -172,10 +201,21 @@ export async function fetchComponentConfig(_componentAddress: any) {
 
     updateBorrowersLinks(openBorrowing);
     updateLatePayersLinks(openLatePayers);
+
+    const fieldsToRetrieve = ["collected_xrd", "fee_xrd", "donations_xrd"];
+    console.log(`fieldsToRetrieve:`, fieldsToRetrieve);
+
+    
+    fieldsToRetrieve.forEach(fieldName => {
+      const fieldValue = getDinamicVaultsSize(json, fieldName);
+      console.log(`${fieldName} Vault:`, fieldValue);
+      hashmap[fieldName] = fieldValue;
+    });
   })
   .catch(error => {
       console.error('Error fetching data:', error);
   });
+  return hashmap;
 }
 
 //for showing current borrowings
@@ -233,23 +273,9 @@ function updateLatePayersLinks(openBorrowingArray: any[]) {
   });
 }
 
-//for showing current late payers //to be reviewd and merged
-function createLatePayersLink(borrower: string) {
-  // Create a new list item for each link
-  const listItem = document.createElement('li');
-
-  // Create a new link element
-  const link = document.createElement('a');
-  
-  // Set attributes for the link
-  link.href = dashboardUrl+'/account/' + borrower + '/nfts';
-  link.target = '_new';
-  link.className = 'number'; // Apply the same styling as the original link
-  link.innerText = borrower.substring(borrower.length-10);
-
-  // Append the link to the list item
-  listItem.appendChild(link);
-  return listItem;
+function getDinamicVaultsSize(data: { details: { state: { fields: any[]; }; }; }, vaultName: string) {
+  const fields = data.details.state.fields.find((field: { field_name: string; }) => field.field_name === vaultName);
+  return fields.value
 }
 
 function getCurrentEpoch(data: { details: { state: { fields: any[]; }; }; }) {
@@ -284,7 +310,7 @@ function getBorrowMaxLimit(data: { details: { state: { fields: any[]; }; }; }) {
 
 function getOpenBorrowing(data: { details: { state: { fields: any[]; }; }; }) {
   const borrowersAccountsField = data.details.state.fields.find((field: { field_name: string; }) => field.field_name === "borrowers_accounts");
-  console.log("borrowers_accounts:", borrowersAccountsField);
+  // console.log("borrowers_accounts:", borrowersAccountsField);
 
   // Check if the "borrowers_accounts" field exists
   if (borrowersAccountsField) {
@@ -312,7 +338,7 @@ function getOpenBorrowing(data: { details: { state: { fields: any[]; }; }; }) {
 
 function getLatePayers(data: { details: { state: { fields: any[]; }; }; }) {
   const borrowersAccountsField = data.details.state.fields.find((field: { field_name: string; }) => field.field_name === "late_payers_accounts");
-  console.log("late_payers_accounts:", borrowersAccountsField);
+  // console.log("late_payers_accounts:", borrowersAccountsField);
 
   // Check if the "borrowers_accounts" field exists
   if (borrowersAccountsField) {
@@ -394,10 +420,10 @@ export async function fetchUserPosition(_accountAddress: string) {
   .then(data => { 
       const resourceAddress = `${lnd_resourceAddress}`;
       const result = getVaultsByResourceAddress(data, resourceAddress);
-      console.log(" NFT id " + JSON.stringify(result));
+      // console.log(" NFT id " + JSON.stringify(result));
       //TODO controllare la presenza di items
       const itemsArray = result && result.length>0 ? result[0].items : null
-      console.log(" itemsArray " + itemsArray);
+      // console.log(" itemsArray " + itemsArray);
       // Loop through itemsArray and make GET requests for each item
       itemsArray?.forEach(async (item: any) => {
         await fetchNftMetadata(resourceAddress, item);
@@ -526,13 +552,12 @@ async function cleanUserPosition() {
 
 
 // *********** Fetch Main Pool size (Gateway) ***********
-export async function fetchMainPoolSize(component: any, xrdAddress: any) {
+export async function fetchMainPoolSize(component: any, xrdAddress: any, hashmap: Hashmap) {
   // Define the data to be sent in the POST request.
   const requestData = `{
       "address": "${component}",
       "resource_address": "${xrdAddress}"
   }`;
-
   // Make an HTTP POST request to the gateway
   fetch(gwUrl+'/state/entity/page/fungible-vaults/', {
       method: 'POST',
@@ -543,10 +568,24 @@ export async function fetchMainPoolSize(component: any, xrdAddress: any) {
   })
   .then(response => response.json()) 
   .then(data => { 
+      console.info('Xrd data Vault:', data);
       // Check if the response has 'items' and process them.
       if (data && data.items && Array.isArray(data.items)) {
-          const amount = data.items.map((item: { amount: any; }) => item.amount);
-          document.getElementById('mainPool')!.innerText = JSON.stringify(amount);
+          // const amount = data.items.map((item: { amount: any; }) => item.amount);
+          // document.getElementById('mainPool')!.innerText = JSON.stringify(amount);
+          for (const key in hashmap) {
+            if (hashmap.hasOwnProperty(key)) {
+                const vaultAddress = hashmap[key]; // Assuming the value is the 'vault_address'
+                // Check if the vaultAddress matches any 'vault_address' in data.items
+                const matchingItem = data.items.find((item: { vault_address: string }) => item.vault_address === vaultAddress);
+                if (matchingItem) {
+                    // If match found, set the amount as the inner text of the corresponding div
+                    const divId = vaultAddress; // Assuming vaultAddress is a valid div id
+                    const amount = matchingItem.amount;
+                    document.getElementById(key)!.innerText = amount.toString();
+                }
+            }
+          }
       } else {
           console.error('Invalid response format.');
       }

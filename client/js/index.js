@@ -370,7 +370,7 @@ createTransactionOnClick('takes_back', 'numberOfLndTokens', 'accountAddress', 't
 createTransactionOnClick('borrow', 'numberOfRequestedXrdTokens', 'expectedBorrowLength','borrow', 'borrowTxResult');
 createTransactionOnClick('repay', 'numberOfRepaiedXrdTokens', 'accountAddress', 'repay', 'repayTxResult');
 
-createTransactionOnClick('fundDevelopment', 'numberOfFundedTokens', 'accountAddress', 'fund', 'fundTxResult');
+// createTransactionOnClick('fundDevelopment', 'numberOfFundedTokens', 'accountAddress', 'fund', 'fundTxResult');
 
 
 function extractErrorMessage(inputString) {
