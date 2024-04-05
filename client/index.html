@@ -186,11 +186,53 @@
   <section>
       <div class="content-wrapper">
         <div class="row-wrapper">
-          <p>Wanna help the development of the project !?!</p>
-          <p>Token holders will receive a share of the fees collected by the platform</p>
-          <p>
-            <a href="https://ociswap.com/resource_rdx1t5vx7fx3xsp6npxhhgefqgk3qdjdhalntwskkspa4yper0tltzjlw8/">Buy Zero with Oci</a> 
-          </p>
+
+          <div class="column">
+            <h3>Tokenize</h3>
+            <p>You can ‘tokenize’ your loan and you’ll get an extra percentage, fixed until the specified maturity date
+            <br>You can withdraw after maturity or you can swap before at a higher/lower value based on market condition !</p>
+            <p><button id="borrow">Tokenize</button></p>
+            <div class="number">
+                <input type="text" placeholder="Number of Token" id="numberOfTokenizedZero">
+                <input type="hidden" placeholder="N° of epochs within which the loan will be repaid" id="expectedTokenizeLength">
+                maturity date <input type="datetime-local" id="tokenizeEndEpochBorrow" name="tokenizeEndEpochBorrow"  />
+                <input type="hidden" placeholder="Account address" id="accountAddress">
+            </div>
+            <div class="number" id="tokenizeTxResult"></div>
+          </div>
+
+          <div class="column">
+            <h3>Swap</h3>
+            <p>You can swap at a higher/lower value based on market condition (before maturity!) </p>
+            <p><button id="repay">Swap</button></p>
+            <div class="number">
+                <input type="text" placeholder="Number of Token" id="numberOfSwapXrdTokens">
+                <input type="hidden" placeholder="Account address" id="accountAddressForSwap">
+            </div>
+            <div class="number" id="SwapTxResult"></div>
+          </div>          
+  
+          <div class="column">
+            <h3>Redeem</h3>
+            <p>Redeems the underlying ZSU from PrincipalToken (after maturity!) </p>
+            <p><button id="repay">Redeem</button></p>
+            <div class="number">
+                <input type="text" placeholder="Number of Token" id="numberOfRedeemedXrdTokens">
+                <input type="hidden" placeholder="Account address" id="accountAddressForRedeem">
+            </div>
+            <div class="number" id="redeemTxResult"></div>
+          </div>
+
+          <div class="column">
+            <h3>Claim Yield</h3>
+            <p>Claim yield and you get back the interest calculated at the time of tozeniking (after maturity!) </p>
+            <p><button id="repay">Claim</button></p>
+            <div class="number">
+                <input type="text" placeholder="Number of Token" id="numberOfClaimedXrdTokens">
+                <input type="hidden" placeholder="Account address" id="accountAddressForClaimed">
+            </div>
+            <div class="number" id="claimedTxResult"></div>
+          </div>          
         </div>
       </div>
         
@@ -204,13 +246,29 @@
 
   </section>
 
+  <section>
+    <div class="content-wrapper">
+      <div class="row-wrapper">
+        <p>Wanna help the development of the project !?!<br>
+        Token holders will receive a share of the fees collected by the platform<br>        
+          <a href="https://ociswap.com/resource_rdx1t5vx7fx3xsp6npxhhgefqgk3qdjdhalntwskkspa4yper0tltzjlw8/">Buy Zero with Oci</a>         
+      </div>
+    </div>
+      
+      <div class="content-wrapper">
+        <p><a href="https://9e4143vtzsr.typeform.com/to/GgQSj4Ec" target="new">Feedback</a></p>
+      </div>
+  </div>
+
+</section>
+
 
   <section>
     <div class="content-wrapper">
       <div class="row-wrapper">
-        <div class="column"></div>
-          Copyright by ZeroCollateral
-          <p><a href="https://docs.zerocollateral.eu/">Documentation</a></p>
+        <div class="column">
+          Copyright by ZeroCollateral<br>
+          <a href="https://docs.zerocollateral.eu/">Documentation</a>
         </div>
       </div>
     </div>
@@ -218,7 +276,6 @@
     <div class="content-wrapper">
       <div class="row-wrapper">
         <div class="column">
-         <p><a href="https://9e4143vtzsr.typeform.com/to/GgQSj4Ec" target="new">Feedback</a></p>
          <p><a href="https://t.me/+ttt0Vqp7E89mZGU0" target="new">Telegram</a></p>
          <p><a href="mailto:info@zerocollateral.eu" target="new">Mail</a></p>
         </div>

@@ -180,6 +180,7 @@ export async function fetchComponentConfig(_componentAddress: any): Promise<Hash
     // const donations_xrd = getDinamicVaultsSize(json, "donations_xrd");
     // console.log("Donations Vault:", donations_xrd);    
 
+    const currentEpochForYouConfig = document.getElementById("currentEpoch");
     // console.log("Reward:", rewardValue);
     // console.log("Period Length:", periodLengthValue);
     const rewardForYouConfig = document.getElementById("rewardForYou");
@@ -189,6 +190,7 @@ export async function fetchComponentConfig(_componentAddress: any): Promise<Hash
     const borrowingsPoolConfig = document.getElementById("borrowingsPool");
     const borrowersConfig = document.getElementById("borrowers");
     const borrowersLink = document.getElementById('borrowers-link');
+    if (currentEpochForYouConfig) currentEpochForYouConfig.textContent = currentEpoch;
     if (rewardForYouConfig) rewardForYouConfig.textContent = rewardValue + '%' ?? '';
     // rewardForYouConfig.textContent = rewardValue + '%';
     // periodLengthConfig.textContent = periodLengthValue;

@@ -38,9 +38,23 @@ function handleTransactionSuccess(result) {
   fetchComponentConfig(componentAddress);
 }
 
+//Utility for cleaning previous red errors
+function cleanPreviousErrors() {
+  document.getElementById('registerTxResult').textContent = "";
+  document.getElementById('unregisterTxResult').textContent = "";
+  document.getElementById('lendTxResult').textContent = "";
+  document.getElementById('takeBackTxResult').textContent = "";
+  document.getElementById('borrowTxResult').textContent = "";
+  document.getElementById('repayTxResult').textContent = "";
+}
+
 // ***** Main function *****
 function createTransactionOnClick(elementId, inputTextId, inputTextId2, method, errorField) {
   document.getElementById(elementId).onclick = async function () {
+    //clean previous error
+    document.getElementById(errorField).textContent = "";
+    cleanPreviousErrors()
+
     let inputValue = document.getElementById(inputTextId).value;
     let inputValue2 = document.getElementById(inputTextId2).value;
     let accountAddressFrom = document.getElementById('accountAddress').value;
@@ -374,11 +388,18 @@ createTransactionOnClick('repay', 'numberOfRepaiedXrdTokens', 'accountAddress', 
 
 
 function extractErrorMessage(inputString) {
-  const regex = /PanicMessage\("([^@]*)@/;
-  const match = regex.exec(inputString);
-  if (match && match[1]) {
-    return match[1];
-  } else {
-    return "No match found";
+  const panicRegex = /PanicMessage\("([^@]*)@/;
+  const resourceRegex = /ResourceError\(([^)]*)/;
+  
+  const panicMatch = panicRegex.exec(inputString);
+  if (panicMatch && panicMatch[1]) {
+    return panicMatch[1];
   }
+  
+  const resourceMatch = resourceRegex.exec(inputString);
+  if (resourceMatch && resourceMatch[1]) {
+    return resourceMatch[1];
+  }
+  
+  return "No match found";
 }
